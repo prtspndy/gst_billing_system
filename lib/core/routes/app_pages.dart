@@ -75,5 +75,10 @@ class AppPages {
       page: () => const BusinessProfileScreen(),
       middlewares: [AuthMiddleware()],
     ),
+    GetPage(
+      name: AppRoutes.businessProfile,
+      page: () => const BusinessProfileScreen(),
+      middlewares: [AuthMiddleware()],
+    ),
   ];
 }

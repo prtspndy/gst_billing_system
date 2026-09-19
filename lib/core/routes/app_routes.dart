@@ -13,4 +13,5 @@ abstract class AppRoutes {
   static const String billDetail = '/bill-detail';
   static const String bills = '/bills';
   static const String settings = '/settings';
+  static const String businessProfile = '/business-profile';
 }

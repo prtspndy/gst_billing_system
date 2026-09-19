@@ -29,7 +29,28 @@ class GstCalculator {
     return (value * 100).roundToDouble() / 100;
   }
 
-  /// Calculates a single BillItem line item
+  /// Determines whether the transaction is Inter-State or Intra-State based on state comparison.
+  /// If shop state != party state -> Inter-State (IGST)
+  /// If shop state == party state -> Intra-State (CGST + SGST)
+  static bool isInterStateSupply(String? partyState, String? shopState) {
+    if (partyState == null || shopState == null) return false;
+    final p = partyState.trim().toLowerCase();
+    final s = shopState.trim().toLowerCase();
+    if (p.isEmpty || s.isEmpty) return false;
+    return p != s;
+  }
+
+  /// Calculates a single BillItem line item:
+  /// - Taxable Amount = Rate × Quantity
+  /// - If Intra-State (Shop State == Party State):
+  ///     - CGST = (Taxable Amount × (GST% / 2)) / 100
+  ///     - SGST = (Taxable Amount × (GST% / 2)) / 100
+  ///     - IGST = 0.0
+  /// - If Inter-State (Shop State != Party State):
+  ///     - CGST = 0.0
+  ///     - SGST = 0.0
+  ///     - IGST = (Taxable Amount × GST%) / 100
+  /// - Line Total = Taxable Amount + CGST + SGST + IGST
   static BillItem calculateLineItem({
     required Item item,
     required int quantity,
@@ -41,18 +62,17 @@ class GstCalculator {
     final double gstPercent = customGstPercent ?? item.gstPercent;
     final double taxableAmount = round(rate * quantity);
 
-    final bool isInterState =
-        partyState.trim().toLowerCase() != shopState.trim().toLowerCase();
+    final bool isInterState = isInterStateSupply(partyState, shopState);
 
     double cgst = 0.0;
     double sgst = 0.0;
     double igst = 0.0;
 
     if (isInterState) {
-      // Different state -> IGST (full GST% as one tax)
+      // Inter-State -> Apply full GST as IGST
       igst = round((taxableAmount * gstPercent) / 100);
     } else {
-      // Same state -> CGST + SGST (split the item's GST% equally)
+      // Intra-State -> Split GST equally into CGST + SGST
       final halfRate = gstPercent / 2.0;
       cgst = round((taxableAmount * halfRate) / 100);
       sgst = round((taxableAmount * halfRate) / 100);
@@ -75,14 +95,19 @@ class GstCalculator {
     );
   }
 
-  /// Calculates full bill totals given a list of line items
+  /// Calculates full bill totals given a list of line items:
+  /// - Subtotal = sum of all items' taxable amounts
+  /// - Total CGST = sum of all items' CGST amounts
+  /// - Total SGST = sum of all items' SGST amounts
+  /// - Total IGST = sum of all items' IGST amounts
+  /// - Total Tax = Total CGST + Total SGST + Total IGST
+  /// - Grand Total = Subtotal + Total Tax
   static GstCalculationResult calculateBillTotals({
     required List<BillItem> items,
     required String partyState,
     required String shopState,
   }) {
-    final bool isInterState =
-        partyState.trim().toLowerCase() != shopState.trim().toLowerCase();
+    final bool isInterState = isInterStateSupply(partyState, shopState);
 
     double subtotal = 0.0;
     double totalCgst = 0.0;

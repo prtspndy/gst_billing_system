@@ -22,6 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
   bool _obscurePassword = true;
 
   // Canonical dark reference theme color tokens
@@ -94,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _googleSignIn() async {
-    setState(() => _isLoading = true);
+    setState(() => _isGoogleLoading = true);
     try {
       final cred = await _authService.signInWithGoogle();
       if (cred != null) {
@@ -104,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _showError(AuthService.getErrorMessage(e));
     } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() => _isGoogleLoading = false);
       }
     }
   }
@@ -417,7 +418,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     SizedBox(
                       height: 52,
                       child: ElevatedButton(
-                        onPressed: _isLoading ? null : _login,
+                        onPressed: (_isLoading || _isGoogleLoading) ? null : _login,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: _btnPrimaryBg,
                           foregroundColor: Colors.white,
@@ -474,7 +475,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       SizedBox(
                         height: 52,
                         child: OutlinedButton(
-                          onPressed: _isLoading ? null : _googleSignIn,
+                          onPressed: (_isLoading || _isGoogleLoading) ? null : _googleSignIn,
                           style: OutlinedButton.styleFrom(
                             backgroundColor: _btnGoogleBg,
                             foregroundColor: Colors.white,
@@ -483,29 +484,38 @@ class _LoginScreenState extends State<LoginScreen> {
                               borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Text(
-                                'G',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.white,
-                                  fontFamily: 'sans-serif',
+                          child: _isGoogleLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    Text(
+                                      'G',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w900,
+                                        color: Colors.white,
+                                        fontFamily: 'sans-serif',
+                                      ),
+                                    ),
+                                    SizedBox(width: 12),
+                                    Text(
+                                      'Continue with Google',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              SizedBox(width: 12),
-                              Text(
-                                'Continue with Google',
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
                         ),
                       ).animate().fadeIn(delay: 350.ms),
 
@@ -520,7 +530,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: TextStyle(fontSize: 14, color: _textMuted),
                         ),
                         TextButton(
-                          onPressed: _isLoading ? null : _goToRegister,
+                          onPressed: (_isLoading || _isGoogleLoading) ? null : _goToRegister,
                           child: const Text(
                             'Create Account',
                             style: TextStyle(

@@ -84,13 +84,17 @@ class BillItemTile extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Rate: ${AppConstants.formatCurrency(item.rate)}',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: colorScheme.onSurface.withValues(alpha: 0.7),
+              Expanded(
+                child: Text(
+                  'Rate: ${AppConstants.formatCurrency(item.rate)}',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
@@ -109,13 +113,138 @@ class BillItemTile extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
+          // Applicable Tax Breakdown (Only applicable taxes shown)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Taxable Amount',
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: colorScheme.onSurface.withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        AppConstants.formatCurrency(item.taxableAmount),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.onSurface.withValues(alpha: 0.9),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                if (!isInterState) ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'CGST (${(item.gstPercent / 2).toStringAsFixed(item.gstPercent % 2 == 0 ? 0 : 1)}%)',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: taxColors.cgst,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          AppConstants.formatCurrency(item.cgst),
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            color: taxColors.cgst,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 3),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'SGST (${(item.gstPercent / 2).toStringAsFixed(item.gstPercent % 2 == 0 ? 0 : 1)}%)',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: taxColors.sgst,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          AppConstants.formatCurrency(item.sgst),
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            color: taxColors.sgst,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ] else ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'IGST (${item.gstPercent.toStringAsFixed(item.gstPercent % 1 == 0 ? 0 : 1)}%)',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: taxColors.igst,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          AppConstants.formatCurrency(item.igst),
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            color: taxColors.igst,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
           Divider(height: 1, color: colorScheme.outlineVariant),
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               if (isEditable && onQuantityChanged != null)
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       'Qty: ',
@@ -127,19 +256,20 @@ class BillItemTile extends StatelessWidget {
                     IconButton(
                       icon: Icon(
                         Icons.remove_circle_outline_rounded,
-                        size: 22,
+                        size: 20,
                         color: colorScheme.primary,
                       ),
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
+                      constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                      visualDensity: VisualDensity.compact,
                       onPressed: item.qty > 1 ? () => onQuantityChanged!(item.qty - 1) : null,
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
                       child: Text(
                         '${item.qty}',
                         style: TextStyle(
-                          fontSize: 15,
+                          fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: colorScheme.onSurface,
                         ),
@@ -148,11 +278,12 @@ class BillItemTile extends StatelessWidget {
                     IconButton(
                       icon: Icon(
                         Icons.add_circle_outline_rounded,
-                        size: 22,
+                        size: 20,
                         color: colorScheme.primary,
                       ),
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
+                      constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                      visualDensity: VisualDensity.compact,
                       onPressed: () => onQuantityChanged!(item.qty + 1),
                     ),
                   ],
@@ -166,26 +297,33 @@ class BillItemTile extends StatelessWidget {
                     color: colorScheme.onSurface,
                   ),
                 ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    'Tax: ${AppConstants.formatCurrency(item.totalTax)}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: isInterState ? taxColors.igst : taxColors.cgst,
-                      fontWeight: FontWeight.w600,
+              const SizedBox(width: 8),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Line Total',
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: colorScheme.onSurface.withValues(alpha: 0.5),
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                  Text(
-                    AppConstants.formatCurrency(item.lineTotal),
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: colorScheme.onSurface,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        AppConstants.formatCurrency(item.lineTotal),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),

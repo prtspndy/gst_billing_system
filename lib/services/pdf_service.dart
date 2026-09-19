@@ -198,8 +198,8 @@ class PdfService {
                       'HSN',
                       'Qty',
                       'Rate',
-                      'Taxable',
-                      'GST%',
+                      'Taxable Amount',
+                      'GST %',
                       'IGST',
                       'Total'
                     ]
@@ -209,15 +209,39 @@ class PdfService {
                       'HSN',
                       'Qty',
                       'Rate',
-                      'Taxable',
-                      'GST%',
+                      'Taxable Amount',
+                      'GST %',
                       'CGST',
                       'SGST',
                       'Total'
                     ],
+              columnWidths: bill.isInterState
+                  ? {
+                      0: const pw.FixedColumnWidth(20),
+                      1: const pw.FlexColumnWidth(3.2),
+                      2: const pw.FixedColumnWidth(42),
+                      3: const pw.FixedColumnWidth(30),
+                      4: const pw.FixedColumnWidth(50),
+                      5: const pw.FixedColumnWidth(60),
+                      6: const pw.FixedColumnWidth(38),
+                      7: const pw.FixedColumnWidth(52),
+                      8: const pw.FixedColumnWidth(60),
+                    }
+                  : {
+                      0: const pw.FixedColumnWidth(18),
+                      1: const pw.FlexColumnWidth(3.0),
+                      2: const pw.FixedColumnWidth(38),
+                      3: const pw.FixedColumnWidth(26),
+                      4: const pw.FixedColumnWidth(46),
+                      5: const pw.FixedColumnWidth(54),
+                      6: const pw.FixedColumnWidth(34),
+                      7: const pw.FixedColumnWidth(46),
+                      8: const pw.FixedColumnWidth(46),
+                      9: const pw.FixedColumnWidth(56),
+                    },
               headerStyle: pw.TextStyle(
                 font: fontBold,
-                fontSize: 9,
+                fontSize: 8.5,
                 color: PdfColors.white,
               ),
               headerDecoration: const pw.BoxDecoration(
@@ -225,7 +249,7 @@ class PdfService {
               ),
               headerHeight: 24,
               cellHeight: 22,
-              cellStyle: const pw.TextStyle(fontSize: 8.5),
+              cellStyle: const pw.TextStyle(fontSize: 8),
               cellAlignment: pw.Alignment.centerRight,
               cellAlignments: {
                 0: pw.Alignment.center,
@@ -334,13 +358,13 @@ class PdfService {
                     ),
                     child: pw.Column(
                       children: [
-                        _pdfSummaryRow('Subtotal (Taxable)', AppConstants.formatCurrency(bill.subtotal), fontRegular),
+                        _pdfSummaryRow('Taxable Amount', AppConstants.formatCurrency(bill.subtotal), fontRegular),
                         pw.Divider(height: 6, thickness: 0.5, color: PdfColors.grey300),
                         if (!bill.isInterState) ...[
-                          _pdfSummaryRow('Total CGST', AppConstants.formatCurrency(bill.totalCgst), fontRegular),
-                          _pdfSummaryRow('Total SGST', AppConstants.formatCurrency(bill.totalSgst), fontRegular),
+                          _pdfSummaryRow('CGST', AppConstants.formatCurrency(bill.totalCgst), fontRegular),
+                          _pdfSummaryRow('SGST', AppConstants.formatCurrency(bill.totalSgst), fontRegular),
                         ] else ...[
-                          _pdfSummaryRow('Total IGST', AppConstants.formatCurrency(bill.totalIgst), fontRegular),
+                          _pdfSummaryRow('IGST', AppConstants.formatCurrency(bill.totalIgst), fontRegular),
                         ],
                         pw.Divider(height: 6, thickness: 0.5, color: PdfColors.grey300),
                         _pdfSummaryRow('Total Tax', AppConstants.formatCurrency(bill.totalTax), fontMedium),

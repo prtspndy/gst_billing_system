@@ -51,9 +51,12 @@ void main() {
     expect(find.text('Address *'), findsOneWidget);
     expect(find.text('Terms & Conditions (Optional)'), findsOneWidget);
 
-    // 4. Verify Primary Save CTA
+    // 4. Verify Primary Save CTA, Logout CTA & Theme Actions
     expect(find.text('SAVE BUSINESS PROFILE'), findsOneWidget);
-    expect(find.text('SAVE'), findsOneWidget);
+    expect(find.text('LOGOUT'), findsOneWidget);
+    expect(find.byIcon(Icons.brightness_auto_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.light_mode_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.dark_mode_rounded), findsOneWidget);
   });
 
   testWidgets('BusinessProfileScreen renders properly in Dark Theme',
@@ -65,5 +68,27 @@ void main() {
     expect(find.text('Shop & Contact Information'), findsOneWidget);
     expect(find.text('GST & Location Information'), findsOneWidget);
     expect(find.text('SAVE BUSINESS PROFILE'), findsOneWidget);
+    expect(find.text('LOGOUT'), findsOneWidget);
+    expect(find.byIcon(Icons.brightness_auto_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.light_mode_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.dark_mode_rounded), findsOneWidget);
+  });
+
+  testWidgets('Theme buttons switch ThemeMode', (WidgetTester tester) async {
+    final themeCtrl = Get.find<ThemeController>();
+    await tester.pumpWidget(buildTestWidget());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.dark_mode_rounded));
+    await tester.pumpAndSettle();
+    expect(themeCtrl.themeMode, ThemeMode.dark);
+
+    await tester.tap(find.byIcon(Icons.light_mode_rounded));
+    await tester.pumpAndSettle();
+    expect(themeCtrl.themeMode, ThemeMode.light);
+
+    await tester.tap(find.byIcon(Icons.brightness_auto_rounded));
+    await tester.pumpAndSettle();
+    expect(themeCtrl.themeMode, ThemeMode.system);
   });
 }

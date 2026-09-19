@@ -22,6 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _confirmPasswordController = TextEditingController();
   final AuthService _authService = AuthService();
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
@@ -87,7 +88,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _googleSignIn() async {
-    setState(() => _isLoading = true);
+    setState(() => _isGoogleLoading = true);
     try {
       final cred = await _authService.signInWithGoogle();
       if (cred != null) {
@@ -97,7 +98,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _showError(AuthService.getErrorMessage(e));
     } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() => _isGoogleLoading = false);
       }
     }
   }
@@ -390,7 +391,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         SizedBox(
                           height: 52,
                           child: ElevatedButton(
-                            onPressed: _isLoading ? null : _register,
+                            onPressed: (_isLoading || _isGoogleLoading) ? null : _register,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: _btnPrimaryBg,
                               foregroundColor: Colors.white,
@@ -447,7 +448,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           SizedBox(
                             height: 52,
                             child: OutlinedButton(
-                              onPressed: _isLoading ? null : _googleSignIn,
+                              onPressed: (_isLoading || _isGoogleLoading) ? null : _googleSignIn,
                               style: OutlinedButton.styleFrom(
                                 backgroundColor: _btnGoogleBg,
                                 foregroundColor: Colors.white,
@@ -456,29 +457,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                               ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
-                                  Text(
-                                    'G',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w900,
-                                      color: Colors.white,
-                                      fontFamily: 'sans-serif',
+                              child: _isGoogleLoading
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: const [
+                                        Text(
+                                          'G',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w900,
+                                            color: Colors.white,
+                                            fontFamily: 'sans-serif',
+                                          ),
+                                        ),
+                                        SizedBox(width: 12),
+                                        Text(
+                                          'Continue with Google',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                  SizedBox(width: 12),
-                                  Text(
-                                    'Continue with Google',
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
-                              ),
                             ),
                           ).animate().fadeIn(delay: 320.ms),
 
@@ -493,7 +503,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               style: TextStyle(fontSize: 14, color: _textMuted),
                             ),
                             TextButton(
-                              onPressed: _isLoading ? null : () => Navigator.pop(context),
+                              onPressed: (_isLoading || _isGoogleLoading) ? null : () => Navigator.pop(context),
                               child: const Text(
                                 'Sign In',
                                 style: TextStyle(

@@ -176,7 +176,9 @@ class _CreateBillScreenState extends State<CreateBillScreen> {
                   onChanged: (val) {
                     final parsed = double.tryParse(val);
                     if (parsed != null && parsed > 0) {
-                      rate = parsed;
+                      setDialogState(() {
+                        rate = parsed;
+                      });
                     }
                   },
                 ),
@@ -204,7 +206,9 @@ class _CreateBillScreenState extends State<CreateBillScreen> {
                         onChanged: (val) {
                           final parsed = int.tryParse(val);
                           if (parsed != null && parsed > 0) {
-                            qty = parsed;
+                            setDialogState(() {
+                              qty = parsed;
+                            });
                           }
                         },
                       ),
@@ -219,6 +223,135 @@ class _CreateBillScreenState extends State<CreateBillScreen> {
                       },
                     ),
                   ],
+                ),
+                const SizedBox(height: 16),
+                // Live GST calculation breakdown preview
+                Builder(
+                  builder: (context) {
+                    final preview = GstCalculator.calculateLineItem(
+                      item: item,
+                      quantity: qty,
+                      rate: rate,
+                      partyState: _selectedParty!.state,
+                      shopState: _shopState,
+                    );
+                    final isInterState = _isInterState;
+                    return Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: colorScheme.outlineVariant),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Taxable Amount:',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: colorScheme.onSurface.withValues(alpha: 0.7),
+                                ),
+                              ),
+                              Text(
+                                AppConstants.formatCurrency(preview.taxableAmount),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          if (!isInterState) ...[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'CGST (${(item.gstPercent / 2).toStringAsFixed(item.gstPercent % 2 == 0 ? 0 : 1)}%):',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: colorScheme.onSurface.withValues(alpha: 0.7),
+                                  ),
+                                ),
+                                Text(
+                                  AppConstants.formatCurrency(preview.cgst),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'SGST (${(item.gstPercent / 2).toStringAsFixed(item.gstPercent % 2 == 0 ? 0 : 1)}%):',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: colorScheme.onSurface.withValues(alpha: 0.7),
+                                  ),
+                                ),
+                                Text(
+                                  AppConstants.formatCurrency(preview.sgst),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ] else ...[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'IGST (${item.gstPercent.toStringAsFixed(item.gstPercent % 1 == 0 ? 0 : 1)}%):',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: colorScheme.onSurface.withValues(alpha: 0.7),
+                                  ),
+                                ),
+                                Text(
+                                  AppConstants.formatCurrency(preview.igst),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                          const Divider(height: 12),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Line Total:',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                AppConstants.formatCurrency(preview.lineTotal),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ],
             ),

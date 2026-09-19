@@ -3,6 +3,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gst_billing_system/core/theme/app_theme.dart';
+import 'package:gst_billing_system/models/bill_item.dart';
+import 'package:gst_billing_system/widgets/bill_item_tile.dart';
 import 'package:gst_billing_system/widgets/common/status_badge.dart';
 import 'package:gst_billing_system/widgets/common/tax_type_chip.dart';
 import 'package:gst_billing_system/widgets/empty_state.dart';
@@ -141,5 +143,50 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.text('HSN: 84713010'), findsOneWidget);
     expect(find.text('GST: 18%'), findsOneWidget);
+  });
+
+  testWidgets('BillItemTile renders without overflow on narrow screens (320px) with large amounts', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(320, 640);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    const sampleItem = BillItem(
+      itemId: 'solar-1',
+      name: 'Solar Inverter 1.5 kVA',
+      hsnCode: '8504',
+      qty: 1,
+      rate: 14000.0,
+      gstPercent: 5.0,
+      taxableAmount: 14000.0,
+      cgst: 350.0,
+      sgst: 350.0,
+      igst: 0.0,
+      lineTotal: 14700.0,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.darkTheme,
+        home: Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: BillItemTile(
+              item: sampleItem,
+              isInterState: false,
+              isEditable: true,
+              onQuantityChanged: (_) {},
+              onRemove: () {},
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.text('Solar Inverter 1.5 kVA'), findsOneWidget);
+    expect(find.text('HSN: 8504'), findsOneWidget);
+    expect(find.text('Taxable Amount'), findsOneWidget);
   });
 }
