@@ -24,6 +24,8 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
   late final TextEditingController _priceController;
 
   double _selectedGstPercent = 18.0;
+  bool _isCustomGst = false;
+  late final TextEditingController _customGstController;
   bool _isLoading = false;
 
   @override
@@ -35,7 +37,24 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
     _priceController = TextEditingController(
       text: item != null ? item.unitPrice.toStringAsFixed(2) : '',
     );
-    _selectedGstPercent = item?.gstPercent ?? 18.0;
+    if (item != null) {
+      _selectedGstPercent = item.gstPercent;
+      if (!AppConstants.gstSlabs.contains(item.gstPercent)) {
+        _isCustomGst = true;
+        _customGstController = TextEditingController(
+          text: item.gstPercent % 1 == 0
+              ? item.gstPercent.toInt().toString()
+              : item.gstPercent.toString(),
+        );
+      } else {
+        _isCustomGst = false;
+        _customGstController = TextEditingController();
+      }
+    } else {
+      _selectedGstPercent = 18.0;
+      _isCustomGst = false;
+      _customGstController = TextEditingController();
+    }
   }
 
   @override
@@ -43,6 +62,7 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
     _nameController.dispose();
     _hsnController.dispose();
     _priceController.dispose();
+    _customGstController.dispose();
     super.dispose();
   }
 
@@ -54,12 +74,30 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
     final itemProvider = Provider.of<ItemProvider>(context, listen: false);
     final isEditing = widget.itemToEdit != null;
 
+    final double gstPercent;
+    if (_isCustomGst) {
+      final parsed = double.tryParse(_customGstController.text.trim());
+      if (parsed == null || parsed < 0 || parsed > 100) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Please enter a valid custom GST percentage (0% to 100%)'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+        return;
+      }
+      gstPercent = parsed;
+    } else {
+      gstPercent = _selectedGstPercent;
+    }
+
     final item = Item(
       id: widget.itemToEdit?.id ?? const Uuid().v4(),
       name: _nameController.text.trim(),
       hsnCode: _hsnController.text.trim().isNotEmpty ? _hsnController.text.trim() : null,
       unitPrice: double.parse(_priceController.text.trim()),
-      gstPercent: _selectedGstPercent,
+      gstPercent: gstPercent,
       createdAt: widget.itemToEdit?.createdAt,
     );
 
