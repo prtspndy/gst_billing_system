@@ -499,19 +499,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 color: colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
                             ),
-                            const SizedBox(height: 16),
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const CreateBillScreen(),
-                                  ),
-                                );
-                              },
-                              icon: const Icon(Icons.add_rounded, size: 18),
-                              label: const Text('Create First Bill'),
-                            ),
                           ],
                         ),
                       ),

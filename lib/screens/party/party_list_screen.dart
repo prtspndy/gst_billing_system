@@ -97,13 +97,6 @@ class _PartyListScreenState extends State<PartyListScreen> {
                         description: partyProvider.searchQuery.isNotEmpty
                             ? 'Try searching with another keyword or name.'
                             : 'Add your first customer to get started with GST billing.',
-                        buttonText: partyProvider.searchQuery.isEmpty ? 'Add Party' : null,
-                        onButtonPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const PartyFormScreen()),
-                          );
-                        },
                       )
                     : RefreshIndicator(
                         onRefresh: () => partyProvider.loadParties(),

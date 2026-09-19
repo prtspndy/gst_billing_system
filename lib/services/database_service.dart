@@ -39,8 +39,8 @@ class DatabaseService {
   SharedPreferences? _prefs;
   bool _isInitialized = false;
 
-  Future<void> init() async {
-    if (_isInitialized) return;
+  Future<void> init({bool force = false}) async {
+    if (_isInitialized && !force) return;
 
     _prefs = await SharedPreferences.getInstance();
 
@@ -123,108 +123,53 @@ class DatabaseService {
     }
 
     _isInitialized = true;
-    await _seedInitialDataIfEmpty();
+    await _cleanupLegacyMockData();
   }
 
-  // ==================== SEED DATA ====================
+  // ==================== LEGACY MOCK DATA CLEANUP ====================
 
-  Future<void> _seedInitialDataIfEmpty() async {
-    final existingParties = await getParties();
-    if (existingParties.isEmpty) {
-      final sampleParties = [
-        Party(
-          id: 'party_1',
-          name: 'Raj Electronics & Appliances',
-          mobile: '9876543210',
-          address: 'Shop 14, City Center Mall, MG Road',
-          state: 'Gujarat',
-          gstin: '24AABCR1234F1Z5',
-          email: 'raj.electronics@gmail.com',
-        ),
-        Party(
-          id: 'party_2',
-          name: 'Priya Traders & Hardware',
-          mobile: '9988776655',
-          address: 'Plot 45, GIDC Industrial Estate',
-          state: 'Maharashtra',
-          gstin: '27AABCP5678K1Z3',
-          email: 'priya.traders@yahoo.com',
-        ),
-        Party(
-          id: 'party_3',
-          name: 'Sharma General Store',
-          mobile: '9123456780',
-          address: 'Near Old Bus Stand, Station Road',
-          state: 'Gujarat',
-          gstin: '24AACCS9876E1Z2',
-          email: 'sharma.store@rediffmail.com',
-        ),
-        Party(
-          id: 'party_4',
-          name: 'Sunrise Tech Solutions',
-          mobile: '8877665544',
-          address: 'Suite 204, IT Park, Hinjawadi',
-          state: 'Maharashtra',
-          gstin: '27AABCS4321M1Z8',
-          email: 'accounts@sunrisetech.in',
-        ),
-      ];
+  /// Purges any legacy mock parties or items that were previously seeded
+  Future<void> _cleanupLegacyMockData() async {
+    const legacyPartyIds = {'party_1', 'party_2', 'party_3', 'party_4'};
+    const legacyItemIds = {'item_1', 'item_2', 'item_3', 'item_4', 'item_5', 'item_6'};
 
-      for (final party in sampleParties) {
-        await insertParty(party);
+    try {
+      if (_sqliteDb != null) {
+        for (final id in legacyPartyIds) {
+          await _sqliteDb!.delete('parties', where: 'id = ?', whereArgs: [id]);
+        }
+        for (final id in legacyItemIds) {
+          await _sqliteDb!.delete('items', where: 'id = ?', whereArgs: [id]);
+        }
       }
-    }
 
-    final existingItems = await getItems();
-    if (existingItems.isEmpty) {
-      final sampleItems = [
-        Item(
-          id: 'item_1',
-          name: 'LED Smart TV 43" 4K',
-          hsnCode: '8528',
-          unitPrice: 24500.0,
-          gstPercent: 18.0,
-        ),
-        Item(
-          id: 'item_2',
-          name: 'Heavy Duty Power Cable (3m)',
-          hsnCode: '8544',
-          unitPrice: 350.0,
-          gstPercent: 18.0,
-        ),
-        Item(
-          id: 'item_3',
-          name: 'Ergonomic Laptop Stand Aluminum',
-          hsnCode: '8473',
-          unitPrice: 1200.0,
-          gstPercent: 12.0,
-        ),
-        Item(
-          id: 'item_4',
-          name: 'Solar Inverter 1.5 kVA',
-          hsnCode: '8504',
-          unitPrice: 14000.0,
-          gstPercent: 5.0,
-        ),
-        Item(
-          id: 'item_5',
-          name: 'Premium Wireless Mouse',
-          hsnCode: '8471',
-          unitPrice: 850.0,
-          gstPercent: 18.0,
-        ),
-        Item(
-          id: 'item_6',
-          name: 'Cotton Hand Gloves (Pack of 10)',
-          hsnCode: '6116',
-          unitPrice: 200.0,
-          gstPercent: 5.0,
-        ),
-      ];
-
-      for (final item in sampleItems) {
-        await insertItem(item);
+      final prefsParties = _prefs?.getStringList('parties_list');
+      if (prefsParties != null) {
+        final filtered = prefsParties.where((raw) {
+          try {
+            final map = jsonDecode(raw) as Map<String, dynamic>;
+            return !legacyPartyIds.contains(map['id']);
+          } catch (_) {
+            return true;
+          }
+        }).toList();
+        await _prefs?.setStringList('parties_list', filtered);
       }
+
+      final prefsItems = _prefs?.getStringList('items_list');
+      if (prefsItems != null) {
+        final filtered = prefsItems.where((raw) {
+          try {
+            final map = jsonDecode(raw) as Map<String, dynamic>;
+            return !legacyItemIds.contains(map['id']);
+          } catch (_) {
+            return true;
+          }
+        }).toList();
+        await _prefs?.setStringList('items_list', filtered);
+      }
+    } catch (e) {
+      debugPrint('Error cleaning up legacy mock data: $e');
     }
   }
 
@@ -234,13 +179,21 @@ class DatabaseService {
     if (_sqliteDb != null) {
       final result = await _sqliteDb!.query('business_profile', limit: 1);
       if (result.isNotEmpty) {
-        return BusinessProfile.fromMap(result.first);
+        final profile = BusinessProfile.fromMap(result.first);
+        if (profile.shopName == 'My Business / Shop') {
+          return const BusinessProfile();
+        }
+        return profile;
       }
     }
 
     final raw = _prefs?.getString('business_profile');
     if (raw != null) {
-      return BusinessProfile.fromMap(jsonDecode(raw) as Map<String, dynamic>);
+      final profile = BusinessProfile.fromMap(jsonDecode(raw) as Map<String, dynamic>);
+      if (profile.shopName == 'My Business / Shop') {
+        return const BusinessProfile();
+      }
+      return profile;
     }
 
     return const BusinessProfile();

@@ -429,7 +429,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  'SAMPLE HEADER',
+                  'LIVE PREVIEW',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,

@@ -11,7 +11,6 @@ import '../../widgets/empty_state.dart';
 import '../../widgets/search_field.dart';
 import '../../widgets/common/glass_app_bar.dart';
 import 'bill_detail_screen.dart';
-import 'create_bill_screen.dart';
 
 class BillListScreen extends StatefulWidget {
   const BillListScreen({super.key});
@@ -160,15 +159,6 @@ class _BillListScreenState extends State<BillListScreen> {
                         description: billProvider.searchQuery.isNotEmpty || hasActiveDateFilter
                             ? 'Try adjusting your search query or date range filter.'
                             : 'Create your first GST invoice using the button below.',
-                        buttonText: (billProvider.searchQuery.isEmpty && !hasActiveDateFilter)
-                            ? 'Create Invoice'
-                            : null,
-                        onButtonPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const CreateBillScreen()),
-                          );
-                        },
                       )
                     : RefreshIndicator(
                         onRefresh: () => billProvider.loadBills(),

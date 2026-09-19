@@ -132,13 +132,6 @@ class _ItemListScreenState extends State<ItemListScreen> {
                         description: itemProvider.searchQuery.isNotEmpty
                             ? 'Try searching with another keyword.'
                             : 'Add products to quickly include them in GST bills without retyping.',
-                        buttonText: itemProvider.searchQuery.isEmpty ? 'Add Item' : null,
-                        onButtonPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const ItemFormScreen()),
-                          );
-                        },
                       )
                     : RefreshIndicator(
                         onRefresh: () => itemProvider.loadItems(),

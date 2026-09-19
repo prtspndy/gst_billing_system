@@ -56,15 +56,15 @@ class Party {
 
   factory Party.fromMap(Map<String, dynamic> map) {
     return Party(
-      id: map['id'] as String,
-      name: map['name'] as String,
-      mobile: map['mobile'] as String,
-      address: map['address'] as String,
-      state: map['state'] as String,
+      id: map['id'] as String? ?? '',
+      name: map['name'] as String? ?? '',
+      mobile: map['mobile'] as String? ?? '',
+      address: map['address'] as String? ?? '',
+      state: map['state'] as String? ?? '',
       gstin: map['gstin'] as String?,
       email: map['email'] as String?,
       createdAt: map['createdAt'] != null
-          ? DateTime.parse(map['createdAt'] as String)
+          ? DateTime.tryParse(map['createdAt'] as String) ?? DateTime.now()
           : DateTime.now(),
     );
   }

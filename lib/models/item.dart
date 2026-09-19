@@ -46,13 +46,13 @@ class Item {
 
   factory Item.fromMap(Map<String, dynamic> map) {
     return Item(
-      id: map['id'] as String,
-      name: map['name'] as String,
+      id: map['id'] as String? ?? '',
+      name: map['name'] as String? ?? '',
       hsnCode: map['hsnCode'] as String?,
-      unitPrice: (map['unitPrice'] as num).toDouble(),
-      gstPercent: (map['gstPercent'] as num).toDouble(),
+      unitPrice: (map['unitPrice'] as num?)?.toDouble() ?? 0.0,
+      gstPercent: (map['gstPercent'] as num?)?.toDouble() ?? 0.0,
       createdAt: map['createdAt'] != null
-          ? DateTime.parse(map['createdAt'] as String)
+          ? DateTime.tryParse(map['createdAt'] as String) ?? DateTime.now()
           : DateTime.now(),
     );
   }

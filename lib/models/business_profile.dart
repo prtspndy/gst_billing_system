@@ -8,12 +8,12 @@ class BusinessProfile {
   final String terms;
 
   const BusinessProfile({
-    this.shopName = 'My Business / Shop',
-    this.address = '123 Market Street, Main Road',
-    this.state = 'Gujarat',
-    this.gstin = '24AAAAA0000A1Z5',
-    this.phone = '9876543210',
-    this.email = 'shop@example.com',
+    this.shopName = '',
+    this.address = '',
+    this.state = '',
+    this.gstin = '',
+    this.phone = '',
+    this.email = '',
     this.terms = '1. Goods once sold will not be taken back.\n2. Subject to local jurisdiction.',
   });
 
@@ -51,9 +51,9 @@ class BusinessProfile {
 
   factory BusinessProfile.fromMap(Map<String, dynamic> map) {
     return BusinessProfile(
-      shopName: map['shopName'] ?? 'My Business / Shop',
+      shopName: map['shopName'] ?? '',
       address: map['address'] ?? '',
-      state: map['state'] ?? 'Gujarat',
+      state: map['state'] ?? '',
       gstin: map['gstin'] ?? '',
       phone: map['phone'] ?? '',
       email: map['email'] ?? '',
