@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../utils/constants.dart';
 
 class CustomSearchField extends StatelessWidget {
   final String hintText;
@@ -17,13 +16,14 @@ class CustomSearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -32,13 +32,14 @@ class CustomSearchField extends StatelessWidget {
       child: TextField(
         controller: controller,
         onChanged: onChanged,
+        style: TextStyle(color: colorScheme.onSurface),
         decoration: InputDecoration(
           hintText: hintText,
-          hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 14),
-          prefixIcon: const Icon(Icons.search, color: AppColors.primary),
+          hintStyle: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.5), fontSize: 14),
+          prefixIcon: Icon(Icons.search, color: colorScheme.primary),
           suffixIcon: controller != null && controller!.text.isNotEmpty
               ? IconButton(
-                  icon: const Icon(Icons.clear, size: 18, color: AppColors.textSecondary),
+                  icon: Icon(Icons.clear, size: 18, color: colorScheme.onSurface.withValues(alpha: 0.7)),
                   onPressed: () {
                     controller!.clear();
                     onChanged('');
@@ -48,18 +49,18 @@ class CustomSearchField extends StatelessWidget {
               : null,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.outline),
+            borderSide: BorderSide(color: colorScheme.outline),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.outline),
+            borderSide: BorderSide(color: colorScheme.outline),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+            borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
           ),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: colorScheme.surface,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
       ),

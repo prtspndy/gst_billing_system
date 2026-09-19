@@ -189,7 +189,7 @@ class _PartyFormScreenState extends State<PartyFormScreen> {
                           ),
                           const SizedBox(height: 16),
                           DropdownButtonFormField<String>(
-                            value: _selectedState,
+                            initialValue: _selectedState,
                             decoration: const InputDecoration(
                               labelText: 'State *',
                               prefixIcon: Icon(Icons.map_outlined),

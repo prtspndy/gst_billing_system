@@ -26,6 +26,7 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWideScreen = constraints.maxWidth >= 768;
@@ -40,16 +41,16 @@ class _HomeShellState extends State<HomeShell> {
                   onDestinationSelected: (index) {
                     setState(() => _currentIndex = index);
                   },
-                  backgroundColor: Colors.white,
-                  selectedIconTheme: const IconThemeData(color: AppColors.primary),
-                  unselectedIconTheme: const IconThemeData(color: AppColors.textSecondary),
-                  selectedLabelTextStyle: const TextStyle(
-                    color: AppColors.primary,
+                  backgroundColor: colorScheme.surface,
+                  selectedIconTheme: IconThemeData(color: colorScheme.primary),
+                  unselectedIconTheme: IconThemeData(color: colorScheme.onSurface.withValues(alpha: 0.6)),
+                  selectedLabelTextStyle: TextStyle(
+                    color: colorScheme.primary,
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
                   ),
-                  unselectedLabelTextStyle: const TextStyle(
-                    color: AppColors.textSecondary,
+                  unselectedLabelTextStyle: TextStyle(
+                    color: colorScheme.onSurface.withValues(alpha: 0.6),
                     fontSize: 12,
                   ),
                   leading: Padding(
@@ -59,7 +60,7 @@ class _HomeShellState extends State<HomeShell> {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: AppColors.primary,
+                            color: colorScheme.primary,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
@@ -131,7 +132,7 @@ class _HomeShellState extends State<HomeShell> {
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.06),
+                  color: Colors.black.withValues(alpha: 0.06),
                   blurRadius: 10,
                   offset: const Offset(0, -2),
                 ),
@@ -142,33 +143,33 @@ class _HomeShellState extends State<HomeShell> {
               onDestinationSelected: (index) {
                 setState(() => _currentIndex = index);
               },
-              backgroundColor: Colors.white,
-              indicatorColor: AppColors.primaryLight,
+              backgroundColor: colorScheme.surface,
+              indicatorColor: colorScheme.primaryContainer,
               elevation: 0,
-              destinations: const [
+              destinations: [
                 NavigationDestination(
-                  icon: Icon(Icons.dashboard_outlined),
-                  selectedIcon: Icon(Icons.dashboard, color: AppColors.primary),
+                  icon: const Icon(Icons.dashboard_outlined),
+                  selectedIcon: Icon(Icons.dashboard, color: colorScheme.primary),
                   label: 'Dashboard',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.people_outline),
-                  selectedIcon: Icon(Icons.people, color: AppColors.primary),
+                  icon: const Icon(Icons.people_outline),
+                  selectedIcon: Icon(Icons.people, color: colorScheme.primary),
                   label: 'Parties',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.inventory_2_outlined),
-                  selectedIcon: Icon(Icons.inventory_2, color: AppColors.primary),
+                  icon: const Icon(Icons.inventory_2_outlined),
+                  selectedIcon: Icon(Icons.inventory_2, color: colorScheme.primary),
                   label: 'Products',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.receipt_long_outlined),
-                  selectedIcon: Icon(Icons.receipt_long, color: AppColors.primary),
+                  icon: const Icon(Icons.receipt_long_outlined),
+                  selectedIcon: Icon(Icons.receipt_long, color: colorScheme.primary),
                   label: 'Invoices',
                 ),
                 NavigationDestination(
-                  icon: Icon(Icons.settings_outlined),
-                  selectedIcon: Icon(Icons.settings, color: AppColors.primary),
+                  icon: const Icon(Icons.settings_outlined),
+                  selectedIcon: Icon(Icons.settings, color: colorScheme.primary),
                   label: 'Settings',
                 ),
               ],

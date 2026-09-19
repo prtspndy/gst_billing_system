@@ -155,8 +155,7 @@ class _CreateBillScreenState extends State<CreateBillScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'GST Rate: ${item.gstPercent.toStringAsFixed(0)}%' +
-                      (item.hsnCode != null ? ' | HSN: ${item.hsnCode}' : ''),
+                  'GST Rate: ${item.gstPercent.toStringAsFixed(0)}%${item.hsnCode != null ? ' | HSN: ${item.hsnCode}' : ''}',
                   style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 16),

@@ -65,17 +65,17 @@ class NumberToWords {
     }
     if (n < 1000) {
       final rem = n % 100;
-      return '${_units[n ~/ 100]} Hundred' + (rem > 0 ? ' ${_convertNumber(rem)}' : '');
+      return '${_units[n ~/ 100]} Hundred${rem > 0 ? ' ${_convertNumber(rem)}' : ''}';
     }
     if (n < 100000) {
       final rem = n % 1000;
-      return '${_convertNumber(n ~/ 1000)} Thousand' + (rem > 0 ? ' ${_convertNumber(rem)}' : '');
+      return '${_convertNumber(n ~/ 1000)} Thousand${rem > 0 ? ' ${_convertNumber(rem)}' : ''}';
     }
     if (n < 10000000) {
       final rem = n % 100000;
-      return '${_convertNumber(n ~/ 100000)} Lakh' + (rem > 0 ? ' ${_convertNumber(rem)}' : '');
+      return '${_convertNumber(n ~/ 100000)} Lakh${rem > 0 ? ' ${_convertNumber(rem)}' : ''}';
     }
     final rem = n % 10000000;
-    return '${_convertNumber(n ~/ 10000000)} Crore' + (rem > 0 ? ' ${_convertNumber(rem)}' : '');
+    return '${_convertNumber(n ~/ 10000000)} Crore${rem > 0 ? ' ${_convertNumber(rem)}' : ''}';
   }
 }

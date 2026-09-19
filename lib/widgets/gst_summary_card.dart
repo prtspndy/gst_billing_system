@@ -24,11 +24,14 @@ class GstSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.secondaryLight.withOpacity(0.35),
+        color: isDark ? colorScheme.surface : AppColors.secondaryLight.withValues(alpha: 0.35),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.secondary.withOpacity(0.3)),
+        border: Border.all(color: isDark ? colorScheme.outline : AppColors.secondary.withValues(alpha: 0.3)),
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -43,13 +46,13 @@ class GstSummaryCard extends StatelessWidget {
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.1,
-                  color: AppColors.secondaryDark,
+                  color: isDark ? colorScheme.secondary : AppColors.secondaryDark,
                 ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: isInterState ? AppColors.igstColor.withOpacity(0.15) : AppColors.cgstColor.withOpacity(0.15),
+                  color: isInterState ? AppColors.igstColor.withValues(alpha: 0.15) : AppColors.cgstColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -64,35 +67,35 @@ class GstSummaryCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          _buildRow('Taxable Subtotal', AppConstants.formatCurrency(subtotal)),
-          const Divider(height: 16, color: AppColors.outline),
+          _buildRow('Taxable Subtotal', AppConstants.formatCurrency(subtotal), context),
+          Divider(height: 16, color: colorScheme.outlineVariant),
           if (!isInterState) ...[
-            _buildRow('Total CGST', AppConstants.formatCurrency(totalCgst), color: AppColors.cgstColor),
+            _buildRow('Total CGST', AppConstants.formatCurrency(totalCgst), context, color: AppColors.cgstColor),
             const SizedBox(height: 4),
-            _buildRow('Total SGST', AppConstants.formatCurrency(totalSgst), color: AppColors.sgstColor),
+            _buildRow('Total SGST', AppConstants.formatCurrency(totalSgst), context, color: AppColors.sgstColor),
           ] else ...[
-            _buildRow('Total IGST', AppConstants.formatCurrency(totalIgst), color: AppColors.igstColor),
+            _buildRow('Total IGST', AppConstants.formatCurrency(totalIgst), context, color: AppColors.igstColor),
           ],
           const SizedBox(height: 4),
-          _buildRow('Total Tax', AppConstants.formatCurrency(totalTax), isBold: true),
-          const Divider(height: 20, thickness: 1.5, color: AppColors.secondary),
+          _buildRow('Total Tax', AppConstants.formatCurrency(totalTax), context, isBold: true),
+          Divider(height: 20, thickness: 1.5, color: colorScheme.secondary),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'GRAND TOTAL',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.primaryDark,
+                  color: colorScheme.primary,
                 ),
               ),
               Text(
                 AppConstants.formatCurrency(grandTotal),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.primaryDark,
+                  color: colorScheme.primary,
                 ),
               ),
             ],
@@ -102,10 +105,10 @@ class GstSummaryCard extends StatelessWidget {
             Text(
               NumberToWords.convert(grandTotal),
               textAlign: TextAlign.right,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontStyle: FontStyle.italic,
-                color: AppColors.textSecondary,
+                color: colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -114,7 +117,8 @@ class GstSummaryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildRow(String title, String value, {bool isBold = false, Color? color}) {
+  Widget _buildRow(String title, String value, BuildContext context, {bool isBold = false, Color? color}) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -122,7 +126,7 @@ class GstSummaryCard extends StatelessWidget {
           title,
           style: TextStyle(
             fontSize: 13,
-            color: color ?? AppColors.textSecondary,
+            color: color ?? colorScheme.onSurface.withValues(alpha: 0.7),
             fontWeight: isBold ? FontWeight.w600 : FontWeight.w400,
           ),
         ),
@@ -130,7 +134,7 @@ class GstSummaryCard extends StatelessWidget {
           value,
           style: TextStyle(
             fontSize: 14,
-            color: color ?? AppColors.textPrimary,
+            color: color ?? colorScheme.onSurface,
             fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
           ),
         ),

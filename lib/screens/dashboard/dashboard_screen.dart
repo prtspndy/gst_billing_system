@@ -8,9 +8,7 @@ import '../../utils/constants.dart';
 import '../bill/bill_detail_screen.dart';
 import '../bill/bill_list_screen.dart';
 import '../bill/create_bill_screen.dart';
-import '../item/item_form_screen.dart';
 import '../item/item_list_screen.dart';
-import '../party/party_form_screen.dart';
 import '../party/party_list_screen.dart';
 import '../settings/business_profile_screen.dart';
 
@@ -170,30 +168,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   // Stats Grid
                   LayoutBuilder(
                     builder: (context, constraints) {
-                      final isWide = constraints.maxWidth > 600;
                       return Column(
                         children: [
                           Row(
                             children: [
                               Expanded(
                                 child: _statCard(
+                                  context,
                                   title: "Today's Sales",
                                   value: AppConstants.formatCurrency(stats.totalSalesToday),
                                   subValue: '${stats.totalBillsToday} bills today',
                                   icon: Icons.today,
                                   iconColor: AppColors.primary,
-                                  bgColor: AppColors.primaryLight.withOpacity(0.4),
+                                  bgColor: AppColors.primaryLight.withValues(alpha: 0.4),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: _statCard(
+                                  context,
                                   title: "This Month Sales",
                                   value: AppConstants.formatCurrency(stats.totalSalesThisMonth),
                                   subValue: '${stats.totalBillsThisMonth} bills this month',
                                   icon: Icons.calendar_month,
                                   iconColor: AppColors.secondary,
-                                  bgColor: AppColors.secondaryLight.withOpacity(0.4),
+                                  bgColor: AppColors.secondaryLight.withValues(alpha: 0.4),
                                 ),
                               ),
                             ],
@@ -203,23 +202,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             children: [
                               Expanded(
                                 child: _statCard(
+                                  context,
                                   title: "Tax Collected (Today)",
                                   value: AppConstants.formatCurrency(stats.totalTaxToday),
                                   subValue: 'CGST / SGST / IGST',
                                   icon: Icons.account_balance,
                                   iconColor: AppColors.cgstColor,
-                                  bgColor: AppColors.primaryLight.withOpacity(0.2),
+                                  bgColor: AppColors.primaryLight.withValues(alpha: 0.2),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: _statCard(
+                                  context,
                                   title: "Tax Collected (Month)",
                                   value: AppConstants.formatCurrency(stats.totalTaxThisMonth),
                                   subValue: 'Total GST for ${AppConstants.monthYearFormat.format(DateTime.now())}',
                                   icon: Icons.pie_chart_outline,
                                   iconColor: AppColors.igstColor,
-                                  bgColor: AppColors.secondaryLight.withOpacity(0.2),
+                                  bgColor: AppColors.secondaryLight.withValues(alpha: 0.2),
                                 ),
                               ),
                             ],
@@ -433,7 +434,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _statCard({
+  Widget _statCard(
+    BuildContext context, {
     required String title,
     required String value,
     required String subValue,
@@ -441,15 +443,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required Color iconColor,
     required Color bgColor,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.outline),
+        border: Border.all(color: colorScheme.outline),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -463,10 +466,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
+                  color: colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
               ),
               Container(
@@ -482,16 +485,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const SizedBox(height: 10),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
+              color: colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             subValue,
-            style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+            style: TextStyle(
+              fontSize: 11,
+              color: colorScheme.onSurface.withValues(alpha: 0.5),
+            ),
           ),
         ],
       ),
@@ -506,6 +512,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required Color color,
     required VoidCallback onTap,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Expanded(
       child: InkWell(
         onTap: onTap,
@@ -513,30 +520,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.outline),
+            border: Border.all(color: colorScheme.outline),
           ),
           child: Column(
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundColor: color.withOpacity(0.12),
+                backgroundColor: color.withValues(alpha: 0.12),
                 child: Icon(icon, size: 20, color: color),
               ),
               const SizedBox(height: 8),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 subtitle,
-                style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: colorScheme.onSurface.withValues(alpha: 0.5),
+                ),
               ),
             ],
           ),

@@ -75,7 +75,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
             context,
             MaterialPageRoute(builder: (context) => const ItemFormScreen()),
           );
-          if (widget.isSelectionMode && newItem != null && mounted) {
+          if (mounted && widget.isSelectionMode && newItem != null) {
             Navigator.pop(context, newItem);
           }
         },

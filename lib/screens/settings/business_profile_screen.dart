@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import '../../core/theme/theme_controller.dart';
 import '../../models/business_profile.dart';
 import '../../providers/business_profile_provider.dart';
+import '../../services/auth_service.dart';
 import '../../utils/constants.dart';
 import '../../utils/validators.dart';
 
@@ -170,7 +173,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                           ),
                           const SizedBox(height: 16),
                           DropdownButtonFormField<String>(
-                            value: _selectedState,
+                            initialValue: _selectedState,
                             decoration: const InputDecoration(
                               labelText: 'Business State *',
                               prefixIcon: Icon(Icons.map_outlined),
@@ -262,6 +265,147 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                               letterSpacing: 0.5,
                             ),
                           ),
+                  ),
+                  const SizedBox(height: 24),
+                  // Appearance & Theme Mode Card
+                  Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(color: Theme.of(context).colorScheme.outline),
+                    ),
+                    color: Theme.of(context).colorScheme.surface,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.palette_outlined, size: 20, color: Theme.of(context).colorScheme.primary),
+                              const SizedBox(width: 8),
+                              Text(
+                                'App Appearance / Theme',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.onSurface,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Choose Light, Dark, or System mode. Changes apply instantly.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          GetBuilder<ThemeController>(
+                            init: Get.find<ThemeController>(),
+                            builder: (themeCtrl) {
+                              return Obx(() {
+                                final current = themeCtrl.themeMode;
+                                return SegmentedButton<ThemeMode>(
+                                  segments: const [
+                                    ButtonSegment(
+                                      value: ThemeMode.system,
+                                      icon: Icon(Icons.brightness_auto, size: 18),
+                                      label: Text('System'),
+                                    ),
+                                    ButtonSegment(
+                                      value: ThemeMode.light,
+                                      icon: Icon(Icons.light_mode, size: 18),
+                                      label: Text('Light'),
+                                    ),
+                                    ButtonSegment(
+                                      value: ThemeMode.dark,
+                                      icon: Icon(Icons.dark_mode, size: 18),
+                                      label: Text('Dark'),
+                                    ),
+                                  ],
+                                  selected: {current},
+                                  onSelectionChanged: (newSelection) {
+                                    themeCtrl.setThemeMode(newSelection.first);
+                                  },
+                                );
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Account & Sign Out Card
+                  Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: const BorderSide(color: AppColors.outline),
+                    ),
+                    color: Colors.white,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Account & Session',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primaryDark,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Signed in as: ${AuthService().currentUser?.email ?? 'Logged in'}',
+                            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                          ),
+                          const SizedBox(height: 16),
+                          OutlinedButton.icon(
+                            onPressed: () async {
+                              final shouldLogout = await showDialog<bool>(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  title: const Text('Sign Out'),
+                                  content: const Text('Are you sure you want to sign out?'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(ctx, false),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.error,
+                                        foregroundColor: Colors.white,
+                                      ),
+                                      onPressed: () => Navigator.pop(ctx, true),
+                                      child: const Text('Sign Out'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (shouldLogout == true) {
+                                await AuthService().signOut();
+                              }
+                            },
+                            icon: const Icon(Icons.logout, color: AppColors.error),
+                            label: const Text('Sign Out', style: TextStyle(color: AppColors.error)),
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: AppColors.error),
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 40),
                 ],

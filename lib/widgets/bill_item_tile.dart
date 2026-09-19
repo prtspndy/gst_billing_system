@@ -20,16 +20,17 @@ class BillItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.outline),
+        border: Border.all(color: colorScheme.outline),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 4,
             offset: const Offset(0, 1),
           ),
@@ -47,19 +48,19 @@ class BillItemTile extends StatelessWidget {
                   children: [
                     Text(
                       item.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: colorScheme.onSurface,
                       ),
                     ),
                     if (item.hsnCode != null && item.hsnCode!.isNotEmpty) ...[
                       const SizedBox(height: 2),
                       Text(
                         'HSN: ${item.hsnCode}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
-                          color: AppColors.textMuted,
+                          color: colorScheme.onSurface.withValues(alpha: 0.5),
                         ),
                       ),
                     ],
@@ -82,27 +83,27 @@ class BillItemTile extends StatelessWidget {
             children: [
               Text(
                 'Rate: ${AppConstants.formatCurrency(item.rate)}',
-                style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 13, color: colorScheme.onSurface.withValues(alpha: 0.7)),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryLight,
+                  color: colorScheme.primaryContainer.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   'GST: ${item.gstPercent.toStringAsFixed(0)}%',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
+                    color: colorScheme.primary,
                   ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          const Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: colorScheme.outlineVariant),
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -150,10 +151,10 @@ class BillItemTile extends StatelessWidget {
                   ),
                   Text(
                     AppConstants.formatCurrency(item.lineTotal),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                 ],

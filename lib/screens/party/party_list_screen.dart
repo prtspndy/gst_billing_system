@@ -43,7 +43,7 @@ class _PartyListScreenState extends State<PartyListScreen> {
             context,
             MaterialPageRoute(builder: (context) => const PartyFormScreen()),
           );
-          if (widget.isSelectionMode && newParty != null && mounted) {
+          if (mounted && widget.isSelectionMode && newParty != null) {
             Navigator.pop(context, newParty);
           }
         },
