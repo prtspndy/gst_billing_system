@@ -136,6 +136,207 @@ class _ShopSetupScreenState extends State<ShopSetupScreen> {
     }
   }
 
+  Widget _buildLiveInvoicePreview(BuildContext context, bool isDark) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final shopName = _shopNameController.text.trim().isNotEmpty
+        ? _shopNameController.text.trim()
+        : 'Your Business / Shop Name';
+    final phone = _phoneController.text.trim().isNotEmpty
+        ? _phoneController.text.trim()
+        : 'Phone Number';
+    final email = _emailController.text.trim();
+    final address = _addressController.text.trim().isNotEmpty
+        ? _addressController.text.trim()
+        : 'Shop / Office Address, City';
+    final state = _selectedState ?? 'State';
+    final gstin = _gstinController.text.trim().toUpperCase();
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF161B22) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: colorScheme.primary.withValues(alpha: isDark ? 0.35 : 0.25),
+          width: 1.5,
+        ),
+        boxShadow: AppShadows.level2(isDark),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Top Ribbon
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: colorScheme.primary.withValues(alpha: 0.12),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.visibility_outlined, size: 16, color: colorScheme.primary),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'LIVE INVOICE PREVIEW',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.8,
+                      color: colorScheme.primary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    'TAX INVOICE',
+                    style: TextStyle(
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Preview Content
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  shopName,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.3,
+                    color: colorScheme.onSurface,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 14,
+                      color: colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        '$address, $state',
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: colorScheme.onSurface.withValues(alpha: 0.7),
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 4,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.phone_outlined,
+                          size: 13,
+                          color: colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          phone,
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            color: colorScheme.onSurface.withValues(alpha: 0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (email.isNotEmpty)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.email_outlined,
+                            size: 13,
+                            color: colorScheme.onSurface.withValues(alpha: 0.6),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            email,
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: colorScheme.onSurface.withValues(alpha: 0.7),
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: gstin.isNotEmpty
+                        ? const Color(0xFF2E7D32).withValues(alpha: 0.12)
+                        : colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: gstin.isNotEmpty
+                          ? const Color(0xFF2E7D32).withValues(alpha: 0.3)
+                          : colorScheme.outlineVariant,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        gstin.isNotEmpty ? Icons.verified_rounded : Icons.info_outline_rounded,
+                        size: 13,
+                        color: gstin.isNotEmpty
+                            ? const Color(0xFF2E7D32)
+                            : colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        gstin.isNotEmpty ? 'GSTIN: $gstin' : 'Unregistered (Composition / Non-GST)',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: gstin.isNotEmpty
+                              ? const Color(0xFF2E7D32)
+                              : colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -163,22 +364,35 @@ class _ShopSetupScreenState extends State<ShopSetupScreen> {
                     Container(
                       padding: const EdgeInsets.all(18.0),
                       decoration: BoxDecoration(
-                        color: isDark
-                            ? colorScheme.primaryContainer.withValues(alpha: 0.35)
-                            : colorScheme.primaryContainer.withValues(alpha: 0.6),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: colorScheme.primary.withValues(alpha: isDark ? 0.35 : 0.25),
+                        gradient: LinearGradient(
+                          colors: isDark
+                              ? [const Color(0xFF161B22), const Color(0xFF1F2937)]
+                              : [
+                                  colorScheme.primaryContainer.withValues(alpha: 0.7),
+                                  colorScheme.surface,
+                                ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: isDark
+                              ? const Color(0xFF30363D)
+                              : colorScheme.outlineVariant,
+                        ),
+                        boxShadow: AppShadows.level1(isDark),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(10),
+                            padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: colorScheme.primary.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: colorScheme.primary.withValues(alpha: 0.3),
+                              ),
                             ),
                             child: Icon(
                               Icons.storefront_rounded,
@@ -191,10 +405,35 @@ class _ShopSetupScreenState extends State<ShopSetupScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: colorScheme.primary.withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        'STEP 1 OF 1 • ONBOARDING',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 0.6,
+                                          color: colorScheme.primary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
                                 Text(
                                   'Set Up Your Shop / Business',
                                   style: theme.textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w700,
+                                    fontSize: 17,
                                     color: colorScheme.onSurface,
                                   ),
                                 ),
@@ -214,7 +453,10 @@ class _ShopSetupScreenState extends State<ShopSetupScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Main Form Surface Card
+                    // Live Invoice Header Preview
+                    _buildLiveInvoicePreview(context, isDark),
+
+                    // Card 1: Shop & Contact Information
                     Container(
                       padding: const EdgeInsets.all(22.0),
                       decoration: BoxDecoration(
@@ -226,13 +468,19 @@ class _ShopSetupScreenState extends State<ShopSetupScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Business Information',
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: colorScheme.primary,
-                              letterSpacing: 0.4,
-                            ),
+                          Row(
+                            children: [
+                              Icon(Icons.storefront_rounded, size: 20, color: colorScheme.primary),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Shop & Contact Information',
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: colorScheme.primary,
+                                  letterSpacing: 0.4,
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 16),
 
@@ -245,6 +493,7 @@ class _ShopSetupScreenState extends State<ShopSetupScreen> {
                               hintText: 'e.g. Apex Electronics & Services',
                               prefixIcon: Icon(Icons.store_rounded),
                             ),
+                            onChanged: (_) => setState(() {}),
                             validator: (v) => Validators.requiredField(v, 'Business / Shop Name'),
                           ),
                           const SizedBox(height: 16),
@@ -262,21 +511,53 @@ class _ShopSetupScreenState extends State<ShopSetupScreen> {
                               hintText: '10-digit phone number',
                               prefixIcon: Icon(Icons.phone_rounded),
                             ),
+                            onChanged: (_) => setState(() {}),
                             validator: (v) => Validators.phone(v, required: true),
                           ),
                           const SizedBox(height: 16),
 
-                          // Address *
+                          // Email (Optional)
                           TextFormField(
-                            controller: _addressController,
-                            maxLines: 2,
-                            textCapitalization: TextCapitalization.sentences,
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
                             decoration: const InputDecoration(
-                              labelText: 'Address *',
-                              hintText: 'Shop/Office address, Area, City, Pincode',
-                              prefixIcon: Icon(Icons.location_on_rounded),
+                              labelText: 'Email (Optional)',
+                              hintText: 'e.g. contact@business.com',
+                              prefixIcon: Icon(Icons.email_rounded),
                             ),
-                            validator: (v) => Validators.requiredField(v, 'Address'),
+                            onChanged: (_) => setState(() {}),
+                            validator: (v) => Validators.email(v, required: false),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+
+                    // Card 2: GST & Location Details
+                    Container(
+                      padding: const EdgeInsets.all(22.0),
+                      decoration: BoxDecoration(
+                        color: colorScheme.surface,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: colorScheme.outline),
+                        boxShadow: AppShadows.level1(isDark),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.location_on_rounded, size: 20, color: colorScheme.primary),
+                              const SizedBox(width: 8),
+                              Text(
+                                'GST & Location Details',
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: colorScheme.primary,
+                                  letterSpacing: 0.4,
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 16),
 
@@ -306,31 +587,7 @@ class _ShopSetupScreenState extends State<ShopSetupScreen> {
                             validator: (v) =>
                                 v == null || v.isEmpty ? 'Please select your state' : null,
                           ),
-                          const SizedBox(height: 20),
-
-                          const Divider(),
                           const SizedBox(height: 16),
-
-                          // Optional Fields Header
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.info_outline_rounded,
-                                size: 16,
-                                color: colorScheme.onSurface.withValues(alpha: 0.5),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Optional GST & Contact Information',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: colorScheme.onSurface.withValues(alpha: 0.6),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 14),
 
                           // GSTIN (Optional)
                           TextFormField(
@@ -350,20 +607,23 @@ class _ShopSetupScreenState extends State<ShopSetupScreen> {
                                 fontSize: 11,
                               ),
                             ),
+                            onChanged: (_) => setState(() {}),
                             validator: (v) => Validators.gstin(v, required: false),
                           ),
                           const SizedBox(height: 16),
 
-                          // Email (Optional)
+                          // Address *
                           TextFormField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
+                            controller: _addressController,
+                            maxLines: 2,
+                            textCapitalization: TextCapitalization.sentences,
                             decoration: const InputDecoration(
-                              labelText: 'Email (Optional)',
-                              hintText: 'e.g. contact@business.com',
-                              prefixIcon: Icon(Icons.email_rounded),
+                              labelText: 'Address *',
+                              hintText: 'Shop/Office address, Area, City, Pincode',
+                              prefixIcon: Icon(Icons.location_on_rounded),
                             ),
-                            validator: (v) => Validators.email(v, required: false),
+                            onChanged: (_) => setState(() {}),
+                            validator: (v) => Validators.requiredField(v, 'Address'),
                           ),
                         ],
                       ),

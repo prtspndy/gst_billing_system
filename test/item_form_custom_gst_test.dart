@@ -15,9 +15,6 @@ class MockItemProvider extends ChangeNotifier implements ItemProvider {
   bool get isLoading => false;
 
   @override
-  String? get errorMessage => null;
-
-  @override
   String get searchQuery => '';
 
   @override

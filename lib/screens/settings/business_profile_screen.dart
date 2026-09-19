@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_shadows.dart';
@@ -108,6 +109,243 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
     }
   }
 
+  Widget _buildLiveInvoicePreview(BuildContext context, bool isDark) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final shopName = _shopNameController.text.trim().isNotEmpty
+        ? _shopNameController.text.trim()
+        : 'Your Business / Shop Name';
+    final phone = _phoneController.text.trim().isNotEmpty
+        ? _phoneController.text.trim()
+        : 'Phone Number';
+    final email = _emailController.text.trim();
+    final address = _addressController.text.trim().isNotEmpty
+        ? _addressController.text.trim()
+        : 'Shop / Office Address, City';
+    final state = _selectedState ?? 'State';
+    final gstin = _gstinController.text.trim().toUpperCase();
+    final terms = _termsController.text.trim();
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF161B22) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: colorScheme.primary.withValues(alpha: isDark ? 0.35 : 0.25),
+          width: 1.5,
+        ),
+        boxShadow: AppShadows.level2(isDark),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Ribbon
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: colorScheme.primary.withValues(alpha: 0.12),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.receipt_long_rounded, size: 16, color: colorScheme.primary),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'INVOICE PREVIEW',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.8,
+                      color: colorScheme.primary,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    'SAMPLE',
+                    style: TextStyle(
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  shopName,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.3,
+                    color: colorScheme.onSurface,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 14,
+                      color: colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        '$address, $state',
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: colorScheme.onSurface.withValues(alpha: 0.7),
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 4,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.phone_outlined,
+                          size: 13,
+                          color: colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          phone,
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            color: colorScheme.onSurface.withValues(alpha: 0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (email.isNotEmpty)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.email_outlined,
+                            size: 13,
+                            color: colorScheme.onSurface.withValues(alpha: 0.6),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            email,
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              color: colorScheme.onSurface.withValues(alpha: 0.7),
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: gstin.isNotEmpty
+                        ? const Color(0xFF2E7D32).withValues(alpha: 0.12)
+                        : colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: gstin.isNotEmpty
+                          ? const Color(0xFF2E7D32).withValues(alpha: 0.3)
+                          : colorScheme.outlineVariant,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        gstin.isNotEmpty ? Icons.verified_rounded : Icons.info_outline_rounded,
+                        size: 13,
+                        color: gstin.isNotEmpty
+                            ? const Color(0xFF2E7D32)
+                            : colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        gstin.isNotEmpty ? 'GSTIN: $gstin' : 'Unregistered (Composition / Non-GST)',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: gstin.isNotEmpty
+                              ? const Color(0xFF2E7D32)
+                              : colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (terms.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  const Divider(height: 1),
+                  const SizedBox(height: 8),
+                  Text(
+                    'TERMS & CONDITIONS:',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                      color: colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    terms,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontStyle: FontStyle.italic,
+                      color: colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _appendTerms(String text) {
+    setState(() {
+      final current = _termsController.text.trim();
+      if (current.isEmpty) {
+        _termsController.text = text;
+      } else if (!current.contains(text)) {
+        _termsController.text = '$current\n$text';
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -147,18 +385,18 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: isDark
-                            ? [const Color(0xFF161B26), const Color(0xFF222D42)]
+                            ? [const Color(0xFF161B22), const Color(0xFF1F2937)]
                             : [
-                                colorScheme.primaryContainer.withValues(alpha: 0.6),
+                                colorScheme.primaryContainer.withValues(alpha: 0.7),
                                 colorScheme.surface,
                               ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(18),
                       border: Border.all(
                         color: isDark
-                            ? const Color(0xFF232B3E)
+                            ? const Color(0xFF30363D)
                             : colorScheme.outlineVariant,
                       ),
                       boxShadow: AppShadows.level1(isDark),
@@ -167,11 +405,11 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                     child: Row(
                       children: [
                         Container(
-                          width: 56,
-                          height: 56,
+                          width: 58,
+                          height: 58,
                           decoration: BoxDecoration(
                             color: colorScheme.primary.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: colorScheme.primary.withValues(alpha: 0.3),
                             ),
@@ -179,7 +417,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                           child: Icon(
                             Icons.storefront_rounded,
                             color: colorScheme.primary,
-                            size: 30,
+                            size: 32,
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -193,12 +431,12 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                     : 'My Business / Shop',
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                                  fontSize: 17,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 6),
                               Wrap(
                                 spacing: 6,
                                 runSpacing: 4,
@@ -211,7 +449,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                     ),
                                     decoration: BoxDecoration(
                                       color: _gstinController.text.isNotEmpty
-                                          ? colorScheme.primary.withValues(alpha: 0.15)
+                                          ? const Color(0xFF2E7D32).withValues(alpha: 0.15)
                                           : colorScheme.surfaceContainerHighest,
                                       borderRadius: BorderRadius.circular(6),
                                     ),
@@ -223,8 +461,8 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                         fontSize: 11,
                                         fontWeight: FontWeight.w600,
                                         color: _gstinController.text.isNotEmpty
-                                            ? colorScheme.primary
-                                            : colorScheme.onSurface.withValues(alpha: 0.6),
+                                          ? const Color(0xFF2E7D32)
+                                          : colorScheme.onSurface.withValues(alpha: 0.6),
                                       ),
                                     ),
                                   ),
@@ -248,11 +486,14 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                   ),
                   const SizedBox(height: 16),
 
+                  // Live Invoice Preview
+                  _buildLiveInvoicePreview(context, isDark),
+
                   // Business / Shop Details Card
                   Container(
                     decoration: BoxDecoration(
                       color: colorScheme.surface,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(18),
                       border: Border.all(color: colorScheme.outline),
                       boxShadow: AppShadows.level1(isDark),
                     ),
@@ -289,6 +530,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _shopNameController,
+                          textCapitalization: TextCapitalization.words,
                           decoration: const InputDecoration(
                             labelText: 'Business / Shop Name *',
                             hintText: 'e.g. Apex Electronics & Services',
@@ -302,11 +544,16 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                         TextFormField(
                           controller: _phoneController,
                           keyboardType: TextInputType.phone,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(10),
+                          ],
                           decoration: const InputDecoration(
                             labelText: 'Mobile / Phone Number *',
                             hintText: '10-digit mobile number for invoices',
                             prefixIcon: Icon(Icons.phone_outlined),
                           ),
+                          onChanged: (_) => setState(() {}),
                           validator: (v) => Validators.phone(v, required: true),
                         ),
                         const SizedBox(height: 16),
@@ -318,6 +565,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                             hintText: 'e.g. contact@apexshop.com',
                             prefixIcon: Icon(Icons.email_outlined),
                           ),
+                          onChanged: (_) => setState(() {}),
                           validator: (v) => Validators.email(v, required: false),
                         ),
                       ],
@@ -329,7 +577,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                   Container(
                     decoration: BoxDecoration(
                       color: colorScheme.surface,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(18),
                       border: Border.all(color: colorScheme.outline),
                       boxShadow: AppShadows.level1(isDark),
                     ),
@@ -395,10 +643,15 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                         TextFormField(
                           controller: _gstinController,
                           textCapitalization: TextCapitalization.characters,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
+                            LengthLimitingTextInputFormatter(15),
+                          ],
                           decoration: const InputDecoration(
                             labelText: 'GSTIN (Optional)',
                             hintText: 'e.g. 24AAAAA0000A1Z5',
                             prefixIcon: Icon(Icons.badge_outlined),
+                            helperText: 'Leave empty if unregistered under GST',
                           ),
                           onChanged: (_) => setState(() {}),
                           validator: (v) =>
@@ -408,11 +661,13 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                         TextFormField(
                           controller: _addressController,
                           maxLines: 2,
+                          textCapitalization: TextCapitalization.sentences,
                           decoration: const InputDecoration(
                             labelText: 'Address *',
                             hintText: 'Shop / office address, city, pincode',
                             prefixIcon: Icon(Icons.place_outlined),
                           ),
+                          onChanged: (_) => setState(() {}),
                           validator: (v) =>
                               Validators.requiredField(v, 'Address'),
                         ),
@@ -425,7 +680,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                   Container(
                     decoration: BoxDecoration(
                       color: colorScheme.surface,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(18),
                       border: Border.all(color: colorScheme.outline),
                       boxShadow: AppShadows.level1(isDark),
                     ),
@@ -459,7 +714,35 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                             color: colorScheme.onSurface.withValues(alpha: 0.6),
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
+                        // Quick term chips
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: [
+                            ActionChip(
+                              avatar: const Icon(Icons.add, size: 14),
+                              label: const Text('Return Policy', style: TextStyle(fontSize: 11)),
+                              onPressed: () => _appendTerms('1. Goods once sold will not be taken back without original bill.'),
+                            ),
+                            ActionChip(
+                              avatar: const Icon(Icons.add, size: 14),
+                              label: const Text('Jurisdiction', style: TextStyle(fontSize: 11)),
+                              onPressed: () => _appendTerms('2. Subject to local court jurisdiction only.'),
+                            ),
+                            ActionChip(
+                              avatar: const Icon(Icons.add, size: 14),
+                              label: const Text('Warranty', style: TextStyle(fontSize: 11)),
+                              onPressed: () => _appendTerms('3. Warranty as per manufacturer terms & conditions.'),
+                            ),
+                            ActionChip(
+                              avatar: const Icon(Icons.clear_all, size: 14),
+                              label: const Text('Clear', style: TextStyle(fontSize: 11)),
+                              onPressed: () => setState(() => _termsController.clear()),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
                         TextFormField(
                           controller: _termsController,
                           maxLines: 3,
@@ -469,6 +752,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                 '1. Goods once sold will not be taken back.\n2. Subject to local jurisdiction.',
                             prefixIcon: Icon(Icons.description_outlined),
                           ),
+                          onChanged: (_) => setState(() {}),
                         ),
                       ],
                     ),
