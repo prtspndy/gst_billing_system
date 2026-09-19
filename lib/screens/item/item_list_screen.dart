@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
+import '../../core/theme/app_shadows.dart';
 import '../../models/item.dart';
 import '../../providers/item_provider.dart';
 import '../../utils/constants.dart';
+import '../../widgets/common/shimmer_loading.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/search_field.dart';
+import '../../widgets/common/glass_app_bar.dart';
+import '../../widgets/common/glass_dialog.dart';
+import '../../widgets/common/glass_fab.dart';
 import 'item_form_screen.dart';
 
 class ItemListScreen extends StatefulWidget {
@@ -26,9 +32,10 @@ class _ItemListScreenState extends State<ItemListScreen> {
   }
 
   void _confirmDelete(Item item) {
+    final colorScheme = Theme.of(context).colorScheme;
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => GlassAlertDialog(
         title: const Text('Delete Item?'),
         content: Text('Are you sure you want to delete "${item.name}"?'),
         actions: [
@@ -38,7 +45,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
+              backgroundColor: colorScheme.error,
               foregroundColor: Colors.white,
             ),
             onPressed: () async {
@@ -60,34 +67,35 @@ class _ItemListScreenState extends State<ItemListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     final itemProvider = Provider.of<ItemProvider>(context);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
+      appBar: GlassAppBar(
         title: Text(widget.isSelectionMode ? 'Select Product' : 'Products & Items'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final newItem = await Navigator.push<Item>(
-            context,
-            MaterialPageRoute(builder: (context) => const ItemFormScreen()),
-          );
-          if (mounted && widget.isSelectionMode && newItem != null) {
-            Navigator.pop(context, newItem);
-          }
-        },
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add),
-        label: const Text('Add Item'),
-      ),
+      floatingActionButton: widget.isSelectionMode
+          ? GlassFloatingActionButton.extended(
+              onPressed: () async {
+                final navigator = Navigator.of(context);
+                final newItem = await navigator.push<Item>(
+                  MaterialPageRoute(builder: (context) => const ItemFormScreen()),
+                );
+                if (!mounted) return;
+                if (widget.isSelectionMode && newItem != null) {
+                  navigator.pop(newItem);
+                }
+              },
+              icon: const Icon(Icons.add_box_rounded),
+              label: const Text('Add Product'),
+            ).animate().scale(duration: 350.ms, curve: Curves.easeOutBack)
+          : null,
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: CustomSearchField(
               controller: _searchController,
               hintText: 'Search products by name or HSN code...',
@@ -95,9 +103,26 @@ class _ItemListScreenState extends State<ItemListScreen> {
               onClear: () => itemProvider.searchItems(''),
             ),
           ),
+          if (!itemProvider.isLoading && itemProvider.items.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '${itemProvider.items.length} ${itemProvider.items.length == 1 ? "Product" : "Products"}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurface.withValues(alpha: 0.55),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
           Expanded(
             child: itemProvider.isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: ShimmerCardLoading(count: 6),
+                  )
                 : itemProvider.items.isEmpty
                     ? EmptyState(
                         icon: Icons.inventory_2_outlined,
@@ -118,22 +143,22 @@ class _ItemListScreenState extends State<ItemListScreen> {
                     : RefreshIndicator(
                         onRefresh: () => itemProvider.loadItems(),
                         child: ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+                          padding: const EdgeInsets.fromLTRB(16, 6, 16, 100),
                           itemCount: itemProvider.items.length,
                           itemBuilder: (context, index) {
                             final item = itemProvider.items[index];
-                            return Card(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                side: const BorderSide(color: AppColors.outline),
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 10),
+                              decoration: BoxDecoration(
+                                color: colorScheme.surface,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: colorScheme.outline),
+                                boxShadow: AppShadows.level1(isDark),
                               ),
-                              color: Colors.white,
                               child: ListTile(
                                 contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
+                                  horizontal: 12,
+                                  vertical: 6,
                                 ),
                                 onTap: () {
                                   if (widget.isSelectionMode) {
@@ -148,63 +173,65 @@ class _ItemListScreenState extends State<ItemListScreen> {
                                   }
                                 },
                                 leading: Container(
-                                  width: 48,
-                                  height: 48,
+                                  width: 40,
+                                  height: 40,
                                   decoration: BoxDecoration(
-                                    color: AppColors.primaryLight,
-                                    borderRadius: BorderRadius.circular(10),
+                                    color: colorScheme.primaryContainer.withValues(alpha: 0.6),
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                  child: const Center(
+                                  child: Center(
                                     child: Icon(
-                                      Icons.shopping_bag_outlined,
-                                      color: AppColors.primary,
+                                      Icons.inventory_2_rounded,
+                                      color: colorScheme.primary,
+                                      size: 20,
                                     ),
                                   ),
                                 ),
                                 title: Text(
                                   item.name,
-                                  style: const TextStyle(
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.w700,
-                                    fontSize: 15,
-                                    color: AppColors.textPrimary,
                                   ),
                                 ),
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     const SizedBox(height: 4),
-                                    Row(
+                                    Wrap(
+                                      spacing: 6,
+                                      runSpacing: 4,
+                                      crossAxisAlignment: WrapCrossAlignment.center,
                                       children: [
-                                        if (item.hsnCode != null && item.hsnCode!.isNotEmpty) ...[
+                                        if (item.hsnCode != null && item.hsnCode!.isNotEmpty)
                                           Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                             decoration: BoxDecoration(
-                                              color: Colors.grey.shade100,
-                                              borderRadius: BorderRadius.circular(4),
+                                              color: colorScheme.surfaceContainerHighest,
+                                              borderRadius: BorderRadius.circular(6),
                                             ),
                                             child: Text(
                                               'HSN: ${item.hsnCode}',
                                               style: TextStyle(
-                                                fontSize: 11,
-                                                color: Colors.grey.shade700,
+                                                fontSize: 10.5,
+                                                color: colorScheme.onSurface.withValues(alpha: 0.7),
                                                 fontWeight: FontWeight.w500,
                                               ),
                                             ),
                                           ),
-                                          const SizedBox(width: 8),
-                                        ],
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                           decoration: BoxDecoration(
-                                            color: AppColors.secondaryLight,
-                                            borderRadius: BorderRadius.circular(4),
+                                            color: colorScheme.secondaryContainer.withValues(alpha: 0.6),
+                                            borderRadius: BorderRadius.circular(6),
                                           ),
                                           child: Text(
                                             'GST: ${item.gstPercent.toStringAsFixed(0)}%',
-                                            style: const TextStyle(
-                                              fontSize: 11,
+                                            style: TextStyle(
+                                              fontSize: 10.5,
                                               fontWeight: FontWeight.w600,
-                                              color: AppColors.secondaryDark,
+                                              color: colorScheme.secondary,
                                             ),
                                           ),
                                         ),
@@ -217,34 +244,52 @@ class _ItemListScreenState extends State<ItemListScreen> {
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         crossAxisAlignment: CrossAxisAlignment.end,
                                         children: [
-                                          Text(
-                                            AppConstants.formatCurrency(item.unitPrice),
-                                            style: const TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold,
-                                              color: AppColors.primaryDark,
+                                          FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            child: Text(
+                                              AppConstants.formatCurrency(item.unitPrice),
+                                              style: TextStyle(
+                                                fontSize: 14.5,
+                                                fontWeight: FontWeight.w800,
+                                                color: colorScheme.primary,
+                                              ),
                                             ),
                                           ),
-                                          const Text(
+                                          const SizedBox(height: 2),
+                                          Text(
                                             'Select',
-                                            style: TextStyle(fontSize: 11, color: AppColors.primary),
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600,
+                                              color: colorScheme.primary,
+                                            ),
                                           ),
                                         ],
                                       )
                                     : Row(
                                         mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
-                                          Text(
-                                            AppConstants.formatCurrency(item.unitPrice),
-                                            style: const TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.bold,
-                                              color: AppColors.primaryDark,
+                                          FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            child: Text(
+                                              AppConstants.formatCurrency(item.unitPrice),
+                                              style: TextStyle(
+                                                fontSize: 14.5,
+                                                fontWeight: FontWeight.w800,
+                                                color: colorScheme.primary,
+                                              ),
                                             ),
                                           ),
-                                          const SizedBox(width: 8),
+                                          const SizedBox(width: 4),
                                           PopupMenuButton<String>(
-                                            icon: const Icon(Icons.more_vert, size: 20, color: AppColors.textMuted),
+                                            padding: EdgeInsets.zero,
+                                            constraints: const BoxConstraints(),
+                                            icon: Icon(
+                                              Icons.more_vert_rounded,
+                                              size: 20,
+                                              color: colorScheme.onSurface.withValues(alpha: 0.5),
+                                            ),
                                             onSelected: (action) {
                                               if (action == 'edit') {
                                                 Navigator.push(
@@ -268,13 +313,13 @@ class _ItemListScreenState extends State<ItemListScreen> {
                                                   ],
                                                 ),
                                               ),
-                                              const PopupMenuItem(
+                                              PopupMenuItem(
                                                 value: 'delete',
                                                 child: Row(
                                                   children: [
-                                                    Icon(Icons.delete_outline, size: 18, color: AppColors.error),
-                                                    SizedBox(width: 8),
-                                                    Text('Delete', style: TextStyle(color: AppColors.error)),
+                                                    Icon(Icons.delete_outline, size: 18, color: colorScheme.error),
+                                                    const SizedBox(width: 8),
+                                                    Text('Delete', style: TextStyle(color: colorScheme.error)),
                                                   ],
                                                 ),
                                               ),
@@ -283,7 +328,10 @@ class _ItemListScreenState extends State<ItemListScreen> {
                                         ],
                                       ),
                               ),
-                            );
+                            )
+                                .animate()
+                                .fadeIn(delay: (index * 30).ms, duration: 250.ms)
+                                .slideX(begin: 0.04, end: 0);
                           },
                         ),
                       ),

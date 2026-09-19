@@ -1,6 +1,6 @@
 {
-    "name": "gst_billing_system",
-    "short_name": "gst_billing_system",
+    "name": "GST Billing",
+    "short_name": "GST Billing",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

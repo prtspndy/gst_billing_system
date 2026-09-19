@@ -24,6 +24,15 @@ class Validators {
     return null;
   }
 
+  // Phone validator (supports required or optional)
+  static String? phone(String? value, {bool required = false}) {
+    if (value == null || value.trim().isEmpty) {
+      if (required) return 'Mobile number is required';
+      return null;
+    }
+    return mobile(value);
+  }
+
   // Email validator (optional or format check)
   static String? email(String? value, {bool required = false}) {
     if (value == null || value.trim().isEmpty) {

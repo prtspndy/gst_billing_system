@@ -10,7 +10,10 @@ class AuthMiddleware extends GetMiddleware {
     final isAuthenticated = authController.isAuthenticated;
 
     // If trying to access protected routes while unauthenticated, redirect to login
-    if (!isAuthenticated && route != AppRoutes.login && route != AppRoutes.register) {
+    if (!isAuthenticated &&
+        route != AppRoutes.login &&
+        route != AppRoutes.register &&
+        route != AppRoutes.splash) {
       return const RouteSettings(name: AppRoutes.login);
     }
 

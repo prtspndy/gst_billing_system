@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
-import '../../models/party.dart';
+import '../../core/theme/app_shadows.dart';
 import '../../models/bill.dart';
-import '../../providers/party_provider.dart';
+import '../../models/party.dart';
 import '../../providers/bill_provider.dart';
+import '../../providers/party_provider.dart';
 import '../../utils/constants.dart';
+import '../../widgets/common/section_header.dart';
+import '../../widgets/common/status_badge.dart';
 import '../bill/bill_detail_screen.dart';
 import '../bill/create_bill_screen.dart';
 import 'party_form_screen.dart';
+import '../../widgets/common/glass_app_bar.dart';
+import '../../widgets/common/glass_dialog.dart';
 
 class PartyDetailScreen extends StatefulWidget {
   final String partyId;
@@ -43,9 +49,10 @@ class _PartyDetailScreenState extends State<PartyDetailScreen> {
   }
 
   void _confirmDelete() {
+    final colorScheme = Theme.of(context).colorScheme;
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => GlassAlertDialog(
         title: const Text('Delete Party?'),
         content: Text(
           'Are you sure you want to delete "${_party?.name}"? '
@@ -58,7 +65,7 @@ class _PartyDetailScreenState extends State<PartyDetailScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
+              backgroundColor: colorScheme.error,
               foregroundColor: Colors.white,
             ),
             onPressed: () async {
@@ -81,6 +88,10 @@ class _PartyDetailScreenState extends State<PartyDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     if (_isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -89,7 +100,7 @@ class _PartyDetailScreenState extends State<PartyDetailScreen> {
 
     if (_party == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Party Not Found')),
+        appBar: const GlassAppBar(title: Text('Party Not Found')),
         body: const Center(child: Text('This party does not exist.')),
       );
     }
@@ -97,14 +108,11 @@ class _PartyDetailScreenState extends State<PartyDetailScreen> {
     final party = _party!;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
+      appBar: GlassAppBar(
         title: Text(party.name),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit),
+            icon: const Icon(Icons.edit_outlined),
             tooltip: 'Edit Party',
             onPressed: () async {
               await Navigator.push(
@@ -117,10 +125,11 @@ class _PartyDetailScreenState extends State<PartyDetailScreen> {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.delete_outline),
+            icon: const Icon(Icons.delete_outline_rounded),
             tooltip: 'Delete Party',
             onPressed: _confirmDelete,
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: RefreshIndicator(
@@ -135,82 +144,99 @@ class _PartyDetailScreenState extends State<PartyDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Profile Card
-                  Card(
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      side: const BorderSide(color: AppColors.outline),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: colorScheme.outline),
+                      boxShadow: AppShadows.level1(isDark),
                     ),
-                    color: Colors.white,
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 28,
-                                backgroundColor: AppColors.primaryLight,
-                                child: Text(
-                                  party.initials,
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.primary,
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 28,
+                              backgroundColor: colorScheme.primaryContainer.withValues(alpha: 0.7),
+                              child: Text(
+                                party.initials,
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.primary,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    party.name,
+                                    style: theme.textTheme.titleMedium?.copyWith(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      party.name,
-                                      style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.textPrimary,
+                                  const SizedBox(height: 4),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.secondaryContainer.withValues(alpha: 0.6),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      party.state,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: colorScheme.secondary,
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.secondaryLight,
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        party.state,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: AppColors.secondaryDark,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                          const Divider(height: 28, color: AppColors.divider),
-                          _infoRow(Icons.phone_outlined, 'Mobile', party.mobile),
+                            ),
+                          ],
+                        ),
+                        Divider(height: 28, color: colorScheme.outlineVariant),
+                        _infoRow(
+                          context,
+                          Icons.phone_outlined,
+                          'Mobile',
+                          party.mobile,
+                        ),
+                        const SizedBox(height: 12),
+                        _infoRow(
+                          context,
+                          Icons.location_on_outlined,
+                          'Address',
+                          party.address,
+                        ),
+                        if (party.gstin != null && party.gstin!.isNotEmpty) ...[
                           const SizedBox(height: 12),
-                          _infoRow(Icons.location_on_outlined, 'Address', party.address),
-                          if (party.gstin != null && party.gstin!.isNotEmpty) ...[
-                            const SizedBox(height: 12),
-                            _infoRow(Icons.badge_outlined, 'GSTIN', party.gstin!),
-                          ],
-                          if (party.email != null && party.email!.isNotEmpty) ...[
-                            const SizedBox(height: 12),
-                            _infoRow(Icons.email_outlined, 'Email', party.email!),
-                          ],
+                          _infoRow(
+                            context,
+                            Icons.badge_outlined,
+                            'GSTIN',
+                            party.gstin!,
+                          ),
                         ],
-                      ),
+                        if (party.email != null && party.email!.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          _infoRow(
+                            context,
+                            Icons.email_outlined,
+                            'Email',
+                            party.email!,
+                          ),
+                        ],
+                      ],
                     ),
-                  ),
+                  ).animate().fadeIn(duration: 300.ms),
 
                   const SizedBox(height: 20),
 
@@ -225,51 +251,44 @@ class _PartyDetailScreenState extends State<PartyDetailScreen> {
                       );
                       _loadData();
                     },
-                    icon: const Icon(Icons.receipt_long),
+                    icon: const Icon(Icons.receipt_long_rounded),
                     label: const Text('CREATE BILL FOR THIS CUSTOMER'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.secondary,
+                      backgroundColor: colorScheme.secondary,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                  ),
+                  ).animate().fadeIn(delay: 100.ms, duration: 300.ms),
 
                   const SizedBox(height: 24),
 
                   // Party Bill History Section
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Bill History (${_partyBills.length})',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primaryDark,
-                        ),
-                      ),
-                    ],
+                  SectionHeader(
+                    title: 'Bill History (${_partyBills.length})',
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
 
                   if (_partyBills.isEmpty)
                     Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppColors.outline),
+                        color: colorScheme.surface,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: colorScheme.outline),
+                        boxShadow: AppShadows.level1(isDark),
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text(
-                          'No bills generated for this party yet.',
-                          style: TextStyle(color: AppColors.textSecondary),
+                          'No bills generated for this customer yet.',
+                          style: TextStyle(
+                            color: colorScheme.onSurface.withValues(alpha: 0.6),
+                          ),
                         ),
                       ),
-                    )
+                    ).animate().fadeIn(delay: 150.ms)
                   else
                     ListView.builder(
                       shrinkWrap: true,
@@ -277,14 +296,14 @@ class _PartyDetailScreenState extends State<PartyDetailScreen> {
                       itemCount: _partyBills.length,
                       itemBuilder: (context, index) {
                         final bill = _partyBills[index];
-                        return Card(
+                        return Container(
                           margin: const EdgeInsets.only(bottom: 10),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: const BorderSide(color: AppColors.outline),
+                          decoration: BoxDecoration(
+                            color: colorScheme.surface,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: colorScheme.outline),
+                            boxShadow: AppShadows.level1(isDark),
                           ),
-                          color: Colors.white,
                           child: ListTile(
                             onTap: () {
                               Navigator.push(
@@ -296,11 +315,16 @@ class _PartyDetailScreenState extends State<PartyDetailScreen> {
                             },
                             title: Text(
                               bill.invoiceNo,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             subtitle: Text(
                               AppConstants.invoiceDateFormat.format(bill.date),
-                              style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontSize: 12,
+                                color: colorScheme.onSurface.withValues(alpha: 0.55),
+                              ),
                             ),
                             trailing: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -308,32 +332,18 @@ class _PartyDetailScreenState extends State<PartyDetailScreen> {
                               children: [
                                 Text(
                                   AppConstants.formatCurrency(bill.grandTotal),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 15,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.primaryDark,
+                                    fontWeight: FontWeight.w800,
+                                    color: colorScheme.primary,
                                   ),
                                 ),
-                                const SizedBox(height: 2),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.success.withOpacity(0.12),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    bill.paymentStatus,
-                                    style: const TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.success,
-                                    ),
-                                  ),
-                                ),
+                                const SizedBox(height: 3),
+                                StatusBadge(status: bill.paymentStatus, fontSize: 9),
                               ],
                             ),
                           ),
-                        );
+                        ).animate().fadeIn(delay: (150 + index * 30).ms, duration: 250.ms);
                       },
                     ),
                 ],
@@ -345,30 +355,32 @@ class _PartyDetailScreenState extends State<PartyDetailScreen> {
     );
   }
 
-  Widget _infoRow(IconData icon, String label, String value) {
+  Widget _infoRow(BuildContext context, IconData icon, String label, String value) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 18, color: AppColors.textSecondary),
+        Icon(icon, size: 18, color: colorScheme.onSurface.withValues(alpha: 0.55)),
         const SizedBox(width: 10),
         SizedBox(
           width: 70,
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
+              color: colorScheme.onSurface.withValues(alpha: 0.65),
             ),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: colorScheme.onSurface,
             ),
           ),
         ),

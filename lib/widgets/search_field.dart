@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_shadows.dart';
 
 class CustomSearchField extends StatelessWidget {
   final String hintText;
@@ -17,29 +18,32 @@ class CustomSearchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: AppShadows.level1(isDark),
       ),
       child: TextField(
         controller: controller,
         onChanged: onChanged,
-        style: TextStyle(color: colorScheme.onSurface),
+        style: TextStyle(color: colorScheme.onSurface, fontSize: 14),
         decoration: InputDecoration(
           hintText: hintText,
-          hintStyle: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.5), fontSize: 14),
-          prefixIcon: Icon(Icons.search, color: colorScheme.primary),
+          hintStyle: TextStyle(
+            color: colorScheme.onSurface.withValues(alpha: 0.5),
+            fontSize: 14,
+          ),
+          prefixIcon: Icon(Icons.search_rounded, color: colorScheme.primary, size: 22),
           suffixIcon: controller != null && controller!.text.isNotEmpty
               ? IconButton(
-                  icon: Icon(Icons.clear, size: 18, color: colorScheme.onSurface.withValues(alpha: 0.7)),
+                  icon: Icon(
+                    Icons.close_rounded,
+                    size: 18,
+                    color: colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
                   onPressed: () {
                     controller!.clear();
                     onChanged('');
@@ -48,20 +52,20 @@ class CustomSearchField extends StatelessWidget {
                 )
               : null,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(color: colorScheme.outline),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(color: colorScheme.outline),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
           ),
           filled: true,
           fillColor: colorScheme.surface,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
       ),
     );

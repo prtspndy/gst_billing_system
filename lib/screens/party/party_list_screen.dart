@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
+import '../../core/theme/app_shadows.dart';
 import '../../models/party.dart';
 import '../../providers/party_provider.dart';
-import '../../utils/constants.dart';
+import '../../widgets/common/shimmer_loading.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/search_field.dart';
+import '../../widgets/common/glass_app_bar.dart';
+import '../../widgets/common/glass_fab.dart';
 import 'party_detail_screen.dart';
 import 'party_form_screen.dart';
 
@@ -28,34 +32,35 @@ class _PartyListScreenState extends State<PartyListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     final partyProvider = Provider.of<PartyProvider>(context);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
+      appBar: GlassAppBar(
         title: Text(widget.isSelectionMode ? 'Select Customer' : 'Parties (Customers)'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final newParty = await Navigator.push<Party>(
-            context,
-            MaterialPageRoute(builder: (context) => const PartyFormScreen()),
-          );
-          if (mounted && widget.isSelectionMode && newParty != null) {
-            Navigator.pop(context, newParty);
-          }
-        },
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.person_add),
-        label: const Text('Add Party'),
-      ),
+      floatingActionButton: widget.isSelectionMode
+          ? GlassFloatingActionButton.extended(
+              onPressed: () async {
+                final navigator = Navigator.of(context);
+                final newParty = await navigator.push<Party>(
+                  MaterialPageRoute(builder: (context) => const PartyFormScreen()),
+                );
+                if (!mounted) return;
+                if (widget.isSelectionMode && newParty != null) {
+                  navigator.pop(newParty);
+                }
+              },
+              icon: const Icon(Icons.person_add_rounded),
+              label: const Text('Add Party'),
+            ).animate().scale(duration: 350.ms, curve: Curves.easeOutBack)
+          : null,
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: CustomSearchField(
               controller: _searchController,
               hintText: 'Search by party name, mobile, GSTIN...',
@@ -63,12 +68,29 @@ class _PartyListScreenState extends State<PartyListScreen> {
               onClear: () => partyProvider.searchParties(''),
             ),
           ),
+          if (!partyProvider.isLoading && partyProvider.parties.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '${partyProvider.parties.length} ${partyProvider.parties.length == 1 ? "Customer" : "Customers"}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurface.withValues(alpha: 0.55),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
           Expanded(
             child: partyProvider.isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: ShimmerCardLoading(count: 6),
+                  )
                 : partyProvider.parties.isEmpty
                     ? EmptyState(
-                        icon: Icons.people_outline,
+                        icon: Icons.people_outline_rounded,
                         title: partyProvider.searchQuery.isNotEmpty
                             ? 'No parties found'
                             : 'No parties added yet',
@@ -86,18 +108,18 @@ class _PartyListScreenState extends State<PartyListScreen> {
                     : RefreshIndicator(
                         onRefresh: () => partyProvider.loadParties(),
                         child: ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+                          padding: const EdgeInsets.fromLTRB(16, 6, 16, 100),
                           itemCount: partyProvider.parties.length,
                           itemBuilder: (context, index) {
                             final party = partyProvider.parties[index];
-                            return Card(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                side: const BorderSide(color: AppColors.outline),
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 10),
+                              decoration: BoxDecoration(
+                                color: colorScheme.surface,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: colorScheme.outline),
+                                boxShadow: AppShadows.level1(isDark),
                               ),
-                              color: Colors.white,
                               child: ListTile(
                                 contentPadding: const EdgeInsets.symmetric(
                                   horizontal: 16,
@@ -116,73 +138,89 @@ class _PartyListScreenState extends State<PartyListScreen> {
                                   }
                                 },
                                 leading: CircleAvatar(
-                                  radius: 24,
-                                  backgroundColor: AppColors.primaryLight,
+                                  radius: 22,
+                                  backgroundColor: colorScheme.primaryContainer.withValues(alpha: 0.7),
                                   child: Text(
                                     party.initials,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: AppColors.primary,
+                                      color: colorScheme.primary,
+                                      fontSize: 13,
                                     ),
                                   ),
                                 ),
                                 title: Text(
                                   party.name,
-                                  style: const TextStyle(
+                                  style: theme.textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.w700,
-                                    fontSize: 15,
-                                    color: AppColors.textPrimary,
                                   ),
                                 ),
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const SizedBox(height: 3),
-                                    Row(
+                                    const SizedBox(height: 4),
+                                    Wrap(
+                                      spacing: 8,
+                                      runSpacing: 4,
+                                      crossAxisAlignment: WrapCrossAlignment.center,
                                       children: [
-                                        const Icon(Icons.phone, size: 13, color: AppColors.textMuted),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          party.mobile,
-                                          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.phone_rounded,
+                                              size: 13,
+                                              color: colorScheme.onSurface.withValues(alpha: 0.45),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              party.mobile,
+                                              style: theme.textTheme.bodySmall?.copyWith(
+                                                color: colorScheme.onSurface.withValues(alpha: 0.7),
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        const SizedBox(width: 12),
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                           decoration: BoxDecoration(
-                                            color: AppColors.secondaryLight,
-                                            borderRadius: BorderRadius.circular(4),
+                                            color: colorScheme.secondaryContainer.withValues(alpha: 0.5),
+                                            borderRadius: BorderRadius.circular(6),
                                           ),
                                           child: Text(
                                             party.state,
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               fontSize: 10,
                                               fontWeight: FontWeight.w600,
-                                              color: AppColors.secondaryDark,
+                                              color: colorScheme.secondary,
                                             ),
                                           ),
                                         ),
                                       ],
                                     ),
                                     if (party.gstin != null && party.gstin!.isNotEmpty) ...[
-                                      const SizedBox(height: 2),
+                                      const SizedBox(height: 3),
                                       Text(
                                         'GSTIN: ${party.gstin}',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 11,
                                           fontFamily: 'monospace',
-                                          color: AppColors.textSecondary,
+                                          color: colorScheme.onSurface.withValues(alpha: 0.6),
                                         ),
                                       ),
                                     ],
                                   ],
                                 ),
-                                trailing: const Icon(
-                                  Icons.chevron_right,
-                                  color: AppColors.textMuted,
+                                trailing: Icon(
+                                  Icons.chevron_right_rounded,
+                                  color: colorScheme.onSurface.withValues(alpha: 0.4),
                                 ),
                               ),
-                            );
+                            )
+                                .animate()
+                                .fadeIn(delay: (index * 30).ms, duration: 250.ms)
+                                .slideX(begin: 0.04, end: 0);
                           },
                         ),
                       ),

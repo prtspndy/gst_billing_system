@@ -37,8 +37,9 @@ class AppColors {
 }
 
 class AppConstants {
-  static const String appName = 'GST Billing System';
+  static const String appName = 'GST Billing';
   static const String appTagline = 'Fast, Reliable & GST-Compliant Invoicing';
+  static const String appLogo = 'assets/logo/app_logo.png';
 
   // Standard Indian GST Slabs
   static const List<double> gstSlabs = [0.0, 5.0, 12.0, 18.0, 28.0];

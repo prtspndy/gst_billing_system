@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_shadows.dart';
 import '../utils/constants.dart';
 import '../utils/number_to_words.dart';
+import 'common/tax_type_chip.dart';
 
 class GstSummaryCard extends StatelessWidget {
   final double subtotal;
@@ -26,74 +29,102 @@ class GstSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final taxColors = context.taxColors;
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? colorScheme.surface : AppColors.secondaryLight.withValues(alpha: 0.35),
+        color: isDark ? colorScheme.surface : colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isDark ? colorScheme.outline : AppColors.secondary.withValues(alpha: 0.3)),
+        border: Border.all(
+          color: isDark
+              ? colorScheme.outline
+              : colorScheme.secondary.withValues(alpha: 0.25),
+          width: 1.2,
+        ),
+        boxShadow: AppShadows.level1(isDark),
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'GST SUMMARY',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.1,
-                  color: isDark ? colorScheme.secondary : AppColors.secondaryDark,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: isInterState ? AppColors.igstColor.withValues(alpha: 0.15) : AppColors.cgstColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  isInterState ? 'Inter-State (IGST)' : 'Intra-State (CGST + SGST)',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    color: isInterState ? AppColors.igstColor : AppColors.cgstColor,
+              Row(
+                children: [
+                  Icon(
+                    Icons.receipt_long_rounded,
+                    size: 18,
+                    color: colorScheme.secondary,
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'GST SUMMARY',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.1,
+                      color: colorScheme.secondary,
+                    ),
+                  ),
+                ],
               ),
+              TaxTypeChip(isInterState: isInterState, isCompact: true),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           _buildRow('Taxable Subtotal', AppConstants.formatCurrency(subtotal), context),
-          Divider(height: 16, color: colorScheme.outlineVariant),
+          Divider(height: 20, color: colorScheme.outlineVariant),
           if (!isInterState) ...[
-            _buildRow('Total CGST', AppConstants.formatCurrency(totalCgst), context, color: AppColors.cgstColor),
-            const SizedBox(height: 4),
-            _buildRow('Total SGST', AppConstants.formatCurrency(totalSgst), context, color: AppColors.sgstColor),
+            _buildRow(
+              'Total CGST',
+              AppConstants.formatCurrency(totalCgst),
+              context,
+              color: taxColors.cgst,
+            ),
+            const SizedBox(height: 6),
+            _buildRow(
+              'Total SGST',
+              AppConstants.formatCurrency(totalSgst),
+              context,
+              color: taxColors.sgst,
+            ),
           ] else ...[
-            _buildRow('Total IGST', AppConstants.formatCurrency(totalIgst), context, color: AppColors.igstColor),
+            _buildRow(
+              'Total IGST',
+              AppConstants.formatCurrency(totalIgst),
+              context,
+              color: taxColors.igst,
+            ),
           ],
-          const SizedBox(height: 4),
-          _buildRow('Total Tax', AppConstants.formatCurrency(totalTax), context, isBold: true),
-          Divider(height: 20, thickness: 1.5, color: colorScheme.secondary),
+          const SizedBox(height: 6),
+          _buildRow(
+            'Total Tax Amount',
+            AppConstants.formatCurrency(totalTax),
+            context,
+            isBold: true,
+          ),
+          Divider(
+            height: 24,
+            thickness: 1.5,
+            color: colorScheme.primary.withValues(alpha: 0.3),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 'GRAND TOTAL',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 15,
                   fontWeight: FontWeight.w800,
+                  letterSpacing: 0.5,
                   color: colorScheme.primary,
                 ),
               ),
               Text(
                 AppConstants.formatCurrency(grandTotal),
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 22,
                   fontWeight: FontWeight.w800,
                   color: colorScheme.primary,
                 ),
@@ -117,7 +148,13 @@ class GstSummaryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildRow(String title, String value, BuildContext context, {bool isBold = false, Color? color}) {
+  Widget _buildRow(
+    String title,
+    String value,
+    BuildContext context, {
+    bool isBold = false,
+    Color? color,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
+import '../../core/theme/app_shadows.dart';
 import '../../models/party.dart';
 import '../../providers/party_provider.dart';
 import '../../utils/constants.dart';
 import '../../utils/validators.dart';
+import '../../widgets/common/glass_app_bar.dart';
 
 class PartyFormScreen extends StatefulWidget {
   final Party? partyToEdit;
@@ -88,15 +90,14 @@ class _PartyFormScreenState extends State<PartyFormScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(isEditing ? 'Party updated successfully' : 'Party added successfully'),
-            backgroundColor: AppColors.success,
           ),
         );
         Navigator.pop(context, party);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to save party. Please try again.'),
-            backgroundColor: AppColors.error,
+          SnackBar(
+            content: const Text('Failed to save party. Please try again.'),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -105,21 +106,24 @@ class _PartyFormScreenState extends State<PartyFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     final isEditing = widget.partyToEdit != null;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
+      appBar: GlassAppBar(
         title: Text(isEditing ? 'Edit Party' : 'Add New Party'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
         actions: [
           TextButton.icon(
             onPressed: _isLoading ? null : _saveParty,
-            icon: const Icon(Icons.check, color: Colors.white),
-            label: const Text(
+            icon: Icon(Icons.check_rounded, color: colorScheme.primary),
+            label: Text(
               'SAVE',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -134,111 +138,110 @@ class _PartyFormScreenState extends State<PartyFormScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Card(
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
+                  Container(
+                    decoration: BoxDecoration(
+                      color: colorScheme.surface,
                       borderRadius: BorderRadius.circular(16),
-                      side: const BorderSide(color: AppColors.outline),
+                      border: Border.all(color: colorScheme.outline),
+                      boxShadow: AppShadows.level1(isDark),
                     ),
-                    color: Colors.white,
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Party Details',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primaryDark,
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Party Details',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _nameController,
+                          decoration: const InputDecoration(
+                            labelText: 'Party / Customer Name *',
+                            hintText: 'e.g. Raj Electronics',
+                            prefixIcon: Icon(Icons.person_outline_rounded),
+                          ),
+                          validator: (v) => Validators.requiredField(v, 'Party name'),
+                          textCapitalization: TextCapitalization.words,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _mobileController,
+                          keyboardType: TextInputType.phone,
+                          decoration: const InputDecoration(
+                            labelText: 'Mobile Number *',
+                            hintText: '10-digit mobile number',
+                            prefixIcon: Icon(Icons.phone_outlined),
+                          ),
+                          validator: Validators.mobile,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _addressController,
+                          maxLines: 2,
+                          decoration: const InputDecoration(
+                            labelText: 'Address *',
+                            hintText: 'Shop / Office / Street address',
+                            prefixIcon: Icon(Icons.location_on_outlined),
+                          ),
+                          validator: (v) => Validators.requiredField(v, 'Address'),
+                        ),
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<String>(
+                          isExpanded: true,
+                          initialValue: _selectedState,
+                          decoration: InputDecoration(
+                            labelText: 'State *',
+                            prefixIcon: const Icon(Icons.map_outlined),
+                            helperText: 'Determines CGST/SGST vs IGST calculation',
+                            helperMaxLines: 2,
+                            helperStyle: TextStyle(
+                              color: colorScheme.onSurface.withValues(alpha: 0.6),
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _nameController,
-                            decoration: const InputDecoration(
-                              labelText: 'Party / Customer Name *',
-                              hintText: 'e.g. Raj Electronics',
-                              prefixIcon: Icon(Icons.person_outline),
-                            ),
-                            validator: (v) => Validators.requiredField(v, 'Party name'),
-                            textCapitalization: TextCapitalization.words,
+                          items: AppConstants.indianStates.map((state) {
+                            return DropdownMenuItem<String>(
+                              value: state,
+                              child: Text(state),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            setState(() => _selectedState = val);
+                          },
+                          validator: (v) =>
+                              v == null || v.isEmpty ? 'Please select state' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _gstinController,
+                          textCapitalization: TextCapitalization.characters,
+                          decoration: const InputDecoration(
+                            labelText: 'GSTIN (Optional)',
+                            hintText: '15-digit GSTIN (e.g. 24AAAAA0000A1Z5)',
+                            prefixIcon: Icon(Icons.badge_outlined),
                           ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _mobileController,
-                            keyboardType: TextInputType.phone,
-                            decoration: const InputDecoration(
-                              labelText: 'Mobile Number *',
-                              hintText: '10-digit mobile number',
-                              prefixIcon: Icon(Icons.phone_outlined),
-                            ),
-                            validator: Validators.mobile,
+                          validator: (v) => Validators.gstin(v, required: false),
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: const InputDecoration(
+                            labelText: 'Email Address (Optional)',
+                            hintText: 'e.g. customer@example.com',
+                            prefixIcon: Icon(Icons.email_outlined),
                           ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _addressController,
-                            maxLines: 2,
-                            decoration: const InputDecoration(
-                              labelText: 'Address *',
-                              hintText: 'Shop / Office / Street address',
-                              prefixIcon: Icon(Icons.location_on_outlined),
-                            ),
-                            validator: (v) => Validators.requiredField(v, 'Address'),
-                          ),
-                          const SizedBox(height: 16),
-                          DropdownButtonFormField<String>(
-                            initialValue: _selectedState,
-                            decoration: const InputDecoration(
-                              labelText: 'State *',
-                              prefixIcon: Icon(Icons.map_outlined),
-                              helperText: 'Important: Determines CGST/SGST vs IGST calculation',
-                            ),
-                            items: AppConstants.indianStates.map((state) {
-                              return DropdownMenuItem<String>(
-                                value: state,
-                                child: Text(state),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              setState(() => _selectedState = val);
-                            },
-                            validator: (v) =>
-                                v == null || v.isEmpty ? 'Please select state' : null,
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _gstinController,
-                            textCapitalization: TextCapitalization.characters,
-                            decoration: const InputDecoration(
-                              labelText: 'GSTIN (Optional)',
-                              hintText: '15-digit GSTIN (e.g. 24AAAAA0000A1Z5)',
-                              prefixIcon: Icon(Icons.badge_outlined),
-                            ),
-                            validator: (v) => Validators.gstin(v, required: false),
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: const InputDecoration(
-                              labelText: 'Email Address (Optional)',
-                              hintText: 'e.g. customer@example.com',
-                              prefixIcon: Icon(Icons.email_outlined),
-                            ),
-                            validator: (v) => Validators.email(v, required: false),
-                          ),
-                        ],
-                      ),
+                          validator: (v) => Validators.email(v, required: false),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: _isLoading ? null : _saveParty,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),

@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
+import '../../core/theme/app_shadows.dart';
 import '../../providers/bill_provider.dart';
 import '../../utils/constants.dart';
+import '../../widgets/common/shimmer_loading.dart';
+import '../../widgets/common/status_badge.dart';
+import '../../widgets/common/tax_type_chip.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/search_field.dart';
+import '../../widgets/common/glass_app_bar.dart';
 import 'bill_detail_screen.dart';
 import 'create_bill_screen.dart';
 
@@ -44,49 +50,38 @@ class _BillListScreenState extends State<BillListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     final billProvider = Provider.of<BillProvider>(context);
 
     final hasActiveDateFilter = billProvider.startDate != null || billProvider.endDate != null;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
+      appBar: GlassAppBar(
         title: const Text('Invoices & Bill History'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: Icon(
-              Icons.date_range,
-              color: hasActiveDateFilter ? Colors.amberAccent : Colors.white,
+              Icons.date_range_rounded,
+              color: hasActiveDateFilter ? colorScheme.primary : null,
             ),
             tooltip: 'Filter by Date Range',
             onPressed: _pickDateRange,
           ),
           if (hasActiveDateFilter)
             IconButton(
-              icon: const Icon(Icons.filter_alt_off),
+              icon: const Icon(Icons.filter_alt_off_rounded),
               tooltip: 'Clear Date Filter',
               onPressed: () => billProvider.setDateRange(null, null),
             ),
+          const SizedBox(width: 8),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CreateBillScreen()),
-          );
-        },
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add),
-        label: const Text('Create Bill'),
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: Column(
               children: [
                 CustomSearchField(
@@ -102,26 +97,30 @@ class _BillListScreenState extends State<BillListScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryLight,
+                          color: colorScheme.primaryContainer.withValues(alpha: 0.6),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.event, size: 14, color: AppColors.primary),
+                            Icon(Icons.event_rounded, size: 14, color: colorScheme.primary),
                             const SizedBox(width: 4),
                             Text(
                               '${AppConstants.invoiceDateFormat.format(billProvider.startDate!)} - ${AppConstants.invoiceDateFormat.format(billProvider.endDate!)}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.primary,
+                                color: colorScheme.primary,
                               ),
                             ),
-                            const SizedBox(width: 4),
+                            const SizedBox(width: 6),
                             GestureDetector(
                               onTap: () => billProvider.setDateRange(null, null),
-                              child: const Icon(Icons.close, size: 14, color: AppColors.primary),
+                              child: Icon(
+                                Icons.close_rounded,
+                                size: 14,
+                                color: colorScheme.primary,
+                              ),
                             ),
                           ],
                         ),
@@ -132,9 +131,26 @@ class _BillListScreenState extends State<BillListScreen> {
               ],
             ),
           ),
+          if (!billProvider.isLoading && billProvider.bills.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  '${billProvider.bills.length} ${billProvider.bills.length == 1 ? "Invoice" : "Invoices"}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurface.withValues(alpha: 0.55),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
           Expanded(
             child: billProvider.isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: ShimmerCardLoading(count: 6),
+                  )
                 : billProvider.bills.isEmpty
                     ? EmptyState(
                         icon: Icons.receipt_long_outlined,
@@ -157,18 +173,18 @@ class _BillListScreenState extends State<BillListScreen> {
                     : RefreshIndicator(
                         onRefresh: () => billProvider.loadBills(),
                         child: ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+                          padding: const EdgeInsets.fromLTRB(16, 6, 16, 100),
                           itemCount: billProvider.bills.length,
                           itemBuilder: (context, index) {
                             final bill = billProvider.bills[index];
-                            return Card(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                side: const BorderSide(color: AppColors.outline),
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 10),
+                              decoration: BoxDecoration(
+                                color: colorScheme.surface,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: colorScheme.outline),
+                                boxShadow: AppShadows.level1(isDark),
                               ),
-                              color: Colors.white,
                               child: ListTile(
                                 contentPadding: const EdgeInsets.symmetric(
                                   horizontal: 16,
@@ -183,40 +199,41 @@ class _BillListScreenState extends State<BillListScreen> {
                                   );
                                 },
                                 leading: Container(
-                                  width: 48,
-                                  height: 48,
+                                  width: 44,
+                                  height: 44,
                                   decoration: BoxDecoration(
-                                    color: bill.isInterState
-                                        ? AppColors.igstColor.withOpacity(0.12)
-                                        : AppColors.primaryLight,
+                                    color: colorScheme.primaryContainer.withValues(alpha: 0.6),
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                   child: Center(
                                     child: Icon(
-                                      Icons.receipt,
-                                      color: bill.isInterState
-                                          ? AppColors.igstColor
-                                          : AppColors.primary,
+                                      Icons.receipt_rounded,
+                                      color: colorScheme.primary,
+                                      size: 22,
                                     ),
                                   ),
                                 ),
                                 title: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(
-                                      bill.invoiceNo,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 15,
-                                        color: AppColors.textPrimary,
+                                    Expanded(
+                                      child: Text(
+                                        bill.invoiceNo,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: theme.textTheme.titleSmall?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                        ),
                                       ),
                                     ),
-                                    Text(
-                                      AppConstants.formatCurrency(bill.grandTotal),
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 16,
-                                        color: AppColors.primaryDark,
+                                    const SizedBox(width: 8),
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(
+                                        AppConstants.formatCurrency(bill.grandTotal),
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 15,
+                                          color: colorScheme.primary,
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -224,62 +241,40 @@ class _BillListScreenState extends State<BillListScreen> {
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const SizedBox(height: 4),
+                                    const SizedBox(height: 3),
                                     Text(
                                       bill.partyName,
-                                      style: const TextStyle(
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: theme.textTheme.bodyMedium?.copyWith(
                                         fontSize: 13,
                                         fontWeight: FontWeight.w500,
-                                        color: AppColors.textPrimary,
                                       ),
                                     ),
-                                    const SizedBox(height: 2),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    const SizedBox(height: 4),
+                                    Wrap(
+                                      alignment: WrapAlignment.spaceBetween,
+                                      runSpacing: 4,
+                                      crossAxisAlignment: WrapCrossAlignment.center,
                                       children: [
                                         Text(
                                           AppConstants.invoiceDateFormat.format(bill.date),
-                                          style: const TextStyle(
+                                          style: theme.textTheme.bodySmall?.copyWith(
                                             fontSize: 11,
-                                            color: AppColors.textMuted,
+                                            color: colorScheme.onSurface.withValues(alpha: 0.55),
                                           ),
                                         ),
                                         Row(
+                                          mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                                              decoration: BoxDecoration(
-                                                color: bill.isInterState
-                                                    ? AppColors.igstColor.withOpacity(0.1)
-                                                    : AppColors.cgstColor.withOpacity(0.1),
-                                                borderRadius: BorderRadius.circular(4),
-                                              ),
-                                              child: Text(
-                                                bill.isInterState ? 'IGST' : 'CGST+SGST',
-                                                style: TextStyle(
-                                                  fontSize: 9,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: bill.isInterState
-                                                      ? AppColors.igstColor
-                                                      : AppColors.cgstColor,
-                                                ),
-                                              ),
+                                            TaxTypeChip(
+                                              isInterState: bill.isInterState,
+                                              isCompact: true,
                                             ),
                                             const SizedBox(width: 6),
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                                              decoration: BoxDecoration(
-                                                color: AppColors.success.withOpacity(0.12),
-                                                borderRadius: BorderRadius.circular(4),
-                                              ),
-                                              child: Text(
-                                                bill.paymentStatus,
-                                                style: const TextStyle(
-                                                  fontSize: 9,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: AppColors.success,
-                                                ),
-                                              ),
+                                            StatusBadge(
+                                              status: bill.paymentStatus,
+                                              fontSize: 9,
                                             ),
                                           ],
                                         ),
@@ -288,7 +283,10 @@ class _BillListScreenState extends State<BillListScreen> {
                                   ],
                                 ),
                               ),
-                            );
+                            )
+                                .animate()
+                                .fadeIn(delay: (index * 30).ms, duration: 250.ms)
+                                .slideX(begin: 0.04, end: 0);
                           },
                         ),
                       ),

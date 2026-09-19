@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import '../../screens/auth/login_screen.dart';
 import '../../screens/auth/register_screen.dart';
+import '../../screens/splash/splash_screen.dart';
 import '../../screens/bill/bill_list_screen.dart';
 import '../../screens/bill/create_bill_screen.dart';
 import '../../screens/home_shell.dart';
@@ -9,13 +10,18 @@ import '../../screens/item/item_list_screen.dart';
 import '../../screens/party/party_form_screen.dart';
 import '../../screens/party/party_list_screen.dart';
 import '../../screens/settings/business_profile_screen.dart';
+import '../../screens/setup/shop_setup_screen.dart';
 import '../middleware/auth_middleware.dart';
 import 'app_routes.dart';
 
 class AppPages {
-  static const String initial = AppRoutes.home;
+  static const String initial = AppRoutes.splash;
 
   static final List<GetPage> pages = [
+    GetPage(
+      name: AppRoutes.splash,
+      page: () => const SplashScreen(),
+    ),
     GetPage(
       name: AppRoutes.home,
       page: () => const HomeShell(),
@@ -28,6 +34,11 @@ class AppPages {
     GetPage(
       name: AppRoutes.register,
       page: () => const RegisterScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.shopSetup,
+      page: () => const ShopSetupScreen(),
+      middlewares: [AuthMiddleware()],
     ),
     GetPage(
       name: AppRoutes.parties,

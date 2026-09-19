@@ -66,5 +66,22 @@ void main() {
         );
       });
     });
+
+    group('Full Name Validation', () {
+      test('valid full name returns null', () {
+        expect(AuthService.validateFullName('Ramesh Kumar'), isNull);
+        expect(AuthService.validateFullName('Om'), isNull);
+      });
+
+      test('empty or whitespace-only name returns error', () {
+        expect(AuthService.validateFullName(null), isNotNull);
+        expect(AuthService.validateFullName(''), isNotNull);
+        expect(AuthService.validateFullName('   '), isNotNull);
+      });
+
+      test('single character name returns error', () {
+        expect(AuthService.validateFullName('A'), isNotNull);
+      });
+    });
   });
 }

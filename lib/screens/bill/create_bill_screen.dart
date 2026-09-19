@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
+import '../../core/theme/app_shadows.dart';
 import '../../models/bill.dart';
 import '../../models/bill_item.dart';
 import '../../models/item.dart';
@@ -10,11 +11,14 @@ import '../../providers/business_profile_provider.dart';
 import '../../services/gst_calculator.dart';
 import '../../utils/constants.dart';
 import '../../widgets/bill_item_tile.dart';
+import '../../widgets/common/tax_type_chip.dart';
 import '../../widgets/gst_summary_card.dart';
+import '../item/item_list_screen.dart';
 import '../party/party_form_screen.dart';
 import '../party/party_list_screen.dart';
-import '../item/item_list_screen.dart';
 import 'bill_detail_screen.dart';
+import '../../widgets/common/glass_app_bar.dart';
+import '../../widgets/common/glass_dialog.dart';
 
 class CreateBillScreen extends StatefulWidget {
   final Party? preselectedParty;
@@ -29,7 +33,7 @@ class _CreateBillScreenState extends State<CreateBillScreen> {
   Party? _selectedParty;
   final List<BillItem> _billItems = [];
   String _invoiceNo = 'Loading...';
-  DateTime _invoiceDate = DateTime.now();
+  final DateTime _invoiceDate = DateTime.now();
   String _paymentStatus = 'Paid';
   final TextEditingController _notesController = TextEditingController();
   bool _isLoading = false;
@@ -139,6 +143,9 @@ class _CreateBillScreenState extends State<CreateBillScreen> {
   }
 
   void _showQuantityDialog(Item item) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     int qty = 1;
     double rate = item.unitPrice;
     final qtyController = TextEditingController(text: '1');
@@ -148,15 +155,15 @@ class _CreateBillScreenState extends State<CreateBillScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setDialogState) {
-          return AlertDialog(
-            title: Text(item.name),
+          return GlassAlertDialog(
+            title: Text(item.name, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'GST Rate: ${item.gstPercent.toStringAsFixed(0)}%${item.hsnCode != null ? ' | HSN: ${item.hsnCode}' : ''}',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  style: TextStyle(fontSize: 12, color: colorScheme.onSurface.withValues(alpha: 0.6)),
                 ),
                 const SizedBox(height: 16),
                 TextField(
@@ -178,7 +185,7 @@ class _CreateBillScreenState extends State<CreateBillScreen> {
                   children: [
                     const Text('Quantity: ', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                     IconButton(
-                      icon: const Icon(Icons.remove_circle_outline, color: AppColors.primary),
+                      icon: Icon(Icons.remove_circle_outline_rounded, color: colorScheme.primary),
                       onPressed: qty > 1
                           ? () {
                               setDialogState(() {
@@ -203,7 +210,7 @@ class _CreateBillScreenState extends State<CreateBillScreen> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.add_circle_outline, color: AppColors.primary),
+                      icon: Icon(Icons.add_circle_outline_rounded, color: colorScheme.primary),
                       onPressed: () {
                         setDialogState(() {
                           qty++;
@@ -221,10 +228,6 @@ class _CreateBillScreenState extends State<CreateBillScreen> {
                 child: const Text('Cancel'),
               ),
               ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                ),
                 onPressed: () {
                   final lineItem = GstCalculator.calculateLineItem(
                     item: item,
@@ -329,13 +332,9 @@ class _CreateBillScreenState extends State<CreateBillScreen> {
     if (mounted) {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Bill generated successfully!'),
-            backgroundColor: AppColors.success,
-          ),
+          const SnackBar(content: Text('Bill generated successfully!')),
         );
 
-        // Navigate to read-only Bill Detail Screen
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -344,9 +343,9 @@ class _CreateBillScreenState extends State<CreateBillScreen> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to save bill. Please try again.'),
-            backgroundColor: AppColors.error,
+          SnackBar(
+            content: const Text('Failed to save bill. Please try again.'),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -355,6 +354,10 @@ class _CreateBillScreenState extends State<CreateBillScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     final totals = _selectedParty != null
         ? GstCalculator.calculateBillTotals(
             items: _billItems,
@@ -364,11 +367,8 @@ class _CreateBillScreenState extends State<CreateBillScreen> {
         : null;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Create GST Bill'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+      appBar: const GlassAppBar(
+        title: Text('Create GST Bill'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -379,261 +379,243 @@ class _CreateBillScreenState extends State<CreateBillScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Invoice Header Card
-                Card(
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    side: const BorderSide(color: AppColors.outline),
+                Container(
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: colorScheme.outline),
+                    boxShadow: AppShadows.level1(isDark),
                   ),
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Invoice Number',
-                              style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Invoice Number',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurface.withValues(alpha: 0.55),
                             ),
-                            Text(
-                              _invoiceNo,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primaryDark,
-                              ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            _invoiceNo,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: colorScheme.primary,
                             ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            const Text(
-                              'Invoice Date',
-                              style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            'Invoice Date',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurface.withValues(alpha: 0.55),
                             ),
-                            Text(
-                              AppConstants.invoiceDateFormat.format(_invoiceDate),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            AppConstants.invoiceDateFormat.format(_invoiceDate),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
 
                 const SizedBox(height: 16),
 
                 // Step 1: Party Selection
-                Card(
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    side: const BorderSide(color: AppColors.outline),
+                Container(
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: colorScheme.outline),
+                    boxShadow: AppShadows.level1(isDark),
                   ),
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '1. Customer / Bill To',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (_selectedParty != null)
+                            TextButton(
+                              onPressed: _pickParty,
+                              child: const Text('Change Party'),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      if (_selectedParty == null)
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
-                              '1. Customer / Bill To',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primaryDark,
-                              ),
-                            ),
-                            if (_selectedParty != null)
-                              TextButton(
+                            Expanded(
+                              child: OutlinedButton.icon(
                                 onPressed: _pickParty,
-                                child: const Text('Change Party'),
+                                icon: const Icon(Icons.people_outline_rounded),
+                                label: const Text('Select Customer'),
                               ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        if (_selectedParty == null)
-                          Row(
-                            children: [
-                              Expanded(
-                                child: OutlinedButton.icon(
-                                  onPressed: _pickParty,
-                                  icon: const Icon(Icons.people_outline),
-                                  label: const Text('Select Existing Party'),
-                                  style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(vertical: 12),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              IconButton(
-                                onPressed: _quickAddParty,
-                                icon: const Icon(Icons.person_add),
-                                tooltip: 'Quick Add Party',
-                                style: IconButton.styleFrom(
-                                  backgroundColor: AppColors.primaryLight,
-                                  foregroundColor: AppColors.primary,
-                                ),
-                              ),
-                            ],
-                          )
-                        else
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: AppColors.background,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: AppColors.outline),
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
+                            const SizedBox(width: 8),
+                            IconButton(
+                              onPressed: _quickAddParty,
+                              icon: const Icon(Icons.person_add_rounded),
+                              tooltip: 'Quick Add Party',
+                              style: IconButton.styleFrom(
+                                backgroundColor: colorScheme.primaryContainer.withValues(alpha: 0.6),
+                                foregroundColor: colorScheme.primary,
+                              ),
+                            ),
+                          ],
+                        )
+                      else
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: colorScheme.outlineVariant),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
                                       _selectedParty!.name,
                                       style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                       ),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: _isInterState ? AppColors.igstColor.withOpacity(0.12) : AppColors.cgstColor.withOpacity(0.12),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        _isInterState ? 'Inter-State (IGST)' : 'Intra-State (CGST+SGST)',
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w600,
-                                          color: _isInterState ? AppColors.igstColor : AppColors.cgstColor,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'State: ${_selectedParty!.state} | Mobile: ${_selectedParty!.mobile}',
-                                  style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
-                                ),
-                                if (_selectedParty!.gstin != null && _selectedParty!.gstin!.isNotEmpty) ...[
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'GSTIN: ${_selectedParty!.gstin}',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontFamily: 'monospace',
-                                      color: AppColors.textSecondary,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
+                                  const SizedBox(width: 8),
+                                  TaxTypeChip(isInterState: _isInterState),
                                 ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'State: ${_selectedParty!.state} | Mobile: ${_selectedParty!.mobile}',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: colorScheme.onSurface.withValues(alpha: 0.7),
+                                ),
+                              ),
+                              if (_selectedParty!.gstin != null && _selectedParty!.gstin!.isNotEmpty) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  'GSTIN: ${_selectedParty!.gstin}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontFamily: 'monospace',
+                                    color: colorScheme.onSurface.withValues(alpha: 0.6),
+                                  ),
+                                ),
                               ],
-                            ),
+                            ],
                           ),
-                      ],
-                    ),
+                        ),
+                    ],
                   ),
                 ),
 
                 const SizedBox(height: 16),
 
                 // Step 2: Line Items
-                Card(
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    side: const BorderSide(color: AppColors.outline),
+                Container(
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: colorScheme.outline),
+                    boxShadow: AppShadows.level1(isDark),
                   ),
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '2. Bill Items (${_billItems.length})',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.primaryDark,
-                              ),
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '2. Bill Items (${_billItems.length})',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
                             ),
-                            ElevatedButton.icon(
-                              onPressed: _addItemFromInventory,
-                              icon: const Icon(Icons.add, size: 18),
-                              label: const Text('Add Product'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        if (_billItems.isEmpty)
-                          Container(
-                            padding: const EdgeInsets.symmetric(vertical: 32),
-                            alignment: Alignment.center,
-                            child: Column(
-                              children: [
-                                Icon(Icons.shopping_cart_outlined, size: 48, color: Colors.grey.shade400),
-                                const SizedBox(height: 8),
-                                const Text(
-                                  'No items added to bill yet.',
-                                  style: TextStyle(color: AppColors.textSecondary),
-                                ),
-                                const SizedBox(height: 8),
-                                TextButton.icon(
-                                  onPressed: _addItemFromInventory,
-                                  icon: const Icon(Icons.add),
-                                  label: const Text('Add Products from Inventory'),
-                                ),
-                              ],
-                            ),
-                          )
-                        else
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: _billItems.length,
-                            itemBuilder: (context, index) {
-                              final item = _billItems[index];
-                              return BillItemTile(
-                                item: item,
-                                isInterState: _isInterState,
-                                isEditable: true,
-                                onQuantityChanged: (newQty) => _onQuantityChanged(index, newQty),
-                                onRemove: () => _removeItem(index),
-                              );
-                            },
                           ),
-                      ],
-                    ),
+                          ElevatedButton.icon(
+                            onPressed: _addItemFromInventory,
+                            icon: const Icon(Icons.add_rounded, size: 18),
+                            label: const Text('Add Product'),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      if (_billItems.isEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 28),
+                          alignment: Alignment.center,
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.shopping_cart_outlined,
+                                size: 44,
+                                color: colorScheme.onSurface.withValues(alpha: 0.3),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'No items added to bill yet.',
+                                style: TextStyle(color: colorScheme.onSurface.withValues(alpha: 0.6)),
+                              ),
+                              const SizedBox(height: 8),
+                              TextButton.icon(
+                                onPressed: _addItemFromInventory,
+                                icon: const Icon(Icons.add_rounded),
+                                label: const Text('Add Products from Inventory'),
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _billItems.length,
+                          itemBuilder: (context, index) {
+                            final item = _billItems[index];
+                            return BillItemTile(
+                              item: item,
+                              isInterState: _isInterState,
+                              isEditable: true,
+                              onQuantityChanged: (newQty) => _onQuantityChanged(index, newQty),
+                              onRemove: () => _removeItem(index),
+                            );
+                          },
+                        ),
+                    ],
                   ),
                 ),
 
@@ -654,64 +636,56 @@ class _CreateBillScreenState extends State<CreateBillScreen> {
                 ],
 
                 // Payment Status & Optional Notes
-                Card(
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    side: const BorderSide(color: AppColors.outline),
+                Container(
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: colorScheme.outline),
+                    boxShadow: AppShadows.level1(isDark),
                   ),
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Payment Status',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Payment Status',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
                         ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: ['Paid', 'Unpaid', 'Partial'].map((status) {
-                            final isSelected = _paymentStatus == status;
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 8.0),
-                              child: ChoiceChip(
-                                label: Text(status),
-                                selected: isSelected,
-                                selectedColor: status == 'Paid'
-                                    ? AppColors.success
-                                    : status == 'Unpaid'
-                                        ? AppColors.error
-                                        : AppColors.warning,
-                                labelStyle: TextStyle(
-                                  color: isSelected ? Colors.white : AppColors.textPrimary,
-                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                ),
-                                onSelected: (bool selected) {
-                                  if (selected) {
-                                    setState(() => _paymentStatus = status);
-                                  }
-                                },
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: ['Paid', 'Unpaid', 'Partial'].map((status) {
+                          final isSelected = _paymentStatus == status;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: ChoiceChip(
+                              label: Text(status),
+                              selected: isSelected,
+                              selectedColor: colorScheme.primary,
+                              labelStyle: TextStyle(
+                                color: isSelected ? Colors.white : colorScheme.onSurface,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                               ),
-                            );
-                          }).toList(),
+                              onSelected: (bool selected) {
+                                if (selected) {
+                                  setState(() => _paymentStatus = status);
+                                }
+                              },
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _notesController,
+                        decoration: const InputDecoration(
+                          labelText: 'Notes / Remarks (Optional)',
+                          hintText: 'e.g. Delivered by carrier, payment via UPI',
+                          prefixIcon: Icon(Icons.note_alt_outlined),
                         ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: _notesController,
-                          decoration: const InputDecoration(
-                            labelText: 'Notes / Remarks (Optional)',
-                            hintText: 'e.g. Delivered by carrier, payment via UPI',
-                            prefixIcon: Icon(Icons.note_alt_outlined),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
 
@@ -721,8 +695,6 @@ class _CreateBillScreenState extends State<CreateBillScreen> {
                 ElevatedButton(
                   onPressed: _isLoading ? null : _saveAndGenerateBill,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -740,9 +712,9 @@ class _CreateBillScreenState extends State<CreateBillScreen> {
                       : const Text(
                           'SAVE & GENERATE INVOICE',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 15,
                             fontWeight: FontWeight.bold,
-                            letterSpacing: 0.5,
+                            letterSpacing: 0.6,
                           ),
                         ),
                 ),

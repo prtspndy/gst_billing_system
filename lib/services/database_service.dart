@@ -246,6 +246,40 @@ class DatabaseService {
     return const BusinessProfile();
   }
 
+  Future<bool> isShopSetupCompleted() async {
+    final completed = _prefs?.getBool('is_shop_setup_completed');
+    if (completed != null) return completed;
+
+    // Check if the business profile was already customized previously
+    if (_sqliteDb != null) {
+      final result = await _sqliteDb!.query('business_profile', limit: 1);
+      if (result.isNotEmpty) {
+        final profile = BusinessProfile.fromMap(result.first);
+        if (profile.shopName.isNotEmpty &&
+            profile.shopName != 'My Business / Shop') {
+          await setShopSetupCompleted(true);
+          return true;
+        }
+      }
+    }
+
+    final raw = _prefs?.getString('business_profile');
+    if (raw != null) {
+      final profile = BusinessProfile.fromMap(jsonDecode(raw) as Map<String, dynamic>);
+      if (profile.shopName.isNotEmpty &&
+          profile.shopName != 'My Business / Shop') {
+        await setShopSetupCompleted(true);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  Future<void> setShopSetupCompleted(bool completed) async {
+    await _prefs?.setBool('is_shop_setup_completed', completed);
+  }
+
   Future<void> saveBusinessProfile(BusinessProfile profile) async {
     if (_sqliteDb != null) {
       final map = profile.toMap();
@@ -257,6 +291,7 @@ class DatabaseService {
       );
     }
     await _prefs?.setString('business_profile', jsonEncode(profile.toMap()));
+    await setShopSetupCompleted(true);
   }
 
   // ==================== PARTIES ====================

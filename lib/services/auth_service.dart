@@ -33,15 +33,29 @@ class AuthService {
     );
   }
 
-  /// Register a new user with email and password.
+  /// Register a new user with email, password, and optional full name.
   Future<UserCredential> createUserWithEmailAndPassword({
     required String email,
     required String password,
+    String? fullName,
   }) async {
-    return await _auth.createUserWithEmailAndPassword(
+    final cred = await _auth.createUserWithEmailAndPassword(
       email: email.trim(),
       password: password,
     );
+    if (fullName != null && fullName.trim().isNotEmpty) {
+      try {
+        await cred.user?.updateDisplayName(fullName.trim());
+      } catch (_) {
+        // Ignore display name update failure if any
+      }
+    }
+    return cred;
+  }
+
+  /// Send password reset email.
+  Future<void> sendPasswordResetEmail({required String email}) async {
+    await _auth.sendPasswordResetEmail(email: email.trim());
   }
 
   /// Sign in with Google (Android, iOS, Web).
@@ -77,6 +91,16 @@ class AuthService {
   }
 
   // --- Validation Helpers ---
+
+  static String? validateFullName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Please enter your full name';
+    }
+    if (value.trim().length < 2) {
+      return 'Name must be at least 2 characters';
+    }
+    return null;
+  }
 
   static final RegExp _emailRegExp = RegExp(
     r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
