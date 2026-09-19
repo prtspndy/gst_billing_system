@@ -1,389 +1,971 @@
 # 🧾 GST Billing System
 
-[![Flutter Version](https://img.shields.io/badge/Flutter-3.12%2B-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
-[![Dart Version](https://img.shields.io/badge/Dart-3.12%2B-0175C2?logo=dart&logoColor=white)](https://dart.dev)
-[![Material Design](https://img.shields.io/badge/Material%20Design-M3%20Glassmorphism-7B1FA2)](https://m3.material.io/)
-[![Platform Support](https://img.shields.io/badge/Platform-Android%20%7C%20iOS%20%7C%20Web%20%7C%20Desktop-4CAF50)]()
-[![Tests](https://img.shields.io/badge/Tests-42%20Passing-success)]()
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)]()
+A professional **GST Billing System** built with **Flutter** for managing business profiles, customers/parties, products, GST invoices, bill history, and PDF invoices.
 
-> **Fast, Reliable & GST-Compliant Invoicing for Small & Medium Enterprises.**
-
-A modern, full-featured cross-platform GST billing and invoicing application built with **Flutter**, **Provider**, **SQLite**, and **Firebase Authentication**. Designed with a premium **Material 3 Glassmorphism** aesthetic, responsive layouts for mobile, tablet, and desktop, and full support for **Light**, **Dark (Midnight Slate)**, and **System** themes.
+The application is designed around the billing workflow specified in the **Darshan University GST Billing System practical task**, with automatic GST calculation for intra-state and inter-state transactions.
 
 ---
 
-## 📑 Table of Contents
+## 📱 Overview
 
-- [Key Features](#-key-features)
-- [Design & User Experience](#-design--user-experience)
-- [Project Architecture & Directory Structure](#-project-architecture--directory-structure)
-- [Project Constants & Configurations](#-project-constants--configurations)
-- [GST Calculation Engine](#-gst-calculation-engine)
-- [Database Schema (SQLite)](#-database-schema-sqlite)
-- [Routes & Navigation](#-routes--navigation)
-- [Getting Started & Installation](#-getting-started--installation)
-- [Testing & Quality Assurance](#-testing--quality-assurance)
-- [Dependencies](#-dependencies)
-- [Contributing & License](#-contributing--license)
+GST Billing System helps small and medium-sized businesses manage their daily billing workflow digitally.
 
----
+The application provides:
 
-## ✨ Key Features
-
-### 🏢 1. Business Profile & Shop Setup
-- **Onboarding Setup Wizard**: Dedicated step-by-step setup screen for first-time business onboarding.
-- **Dedicated Business Profile Screen**: Manage Shop Name, Contact Number, Business Email, State, GSTIN, and custom Invoice Terms & Conditions.
-- **Quick App Bar Navigation**: Tap anywhere on the Dashboard/Home App Bar to instantly access and update your Business Profile / Shop Setup.
-- **Invoice Header Integration**: Saved business details automatically populate the header and legal footer of every generated GST invoice.
-
-### 👥 2. Customer / Party Management
-- Complete CRUD operations for customers/parties.
-- Tracks Name, Mobile Number, Address, State, GSTIN, and Email.
-- Real-time search by customer name, phone number, or GSTIN.
-- Customer detail view with complete billing history and outstanding balances.
-- Reusable customer picker modal during invoice creation.
-
-### 📦 3. Products & Items Catalog
-- Reusable product catalog preventing manual data re-entry.
-- Item Name, HSN/SAC Code, Unit Price, Standard GST Slabs (0%, 5%, 12%, 18%, 28%), and **Custom GST Rate** input support (e.g. 0.25%, 3%, 7.5%).
-- Fast search and filtering by item name or HSN code.
-- Quick product selection dialog when composing invoices.
-
-### 🧾 4. GST-Compliant Invoice Creation
-- Create comprehensive GST invoices in under 60 seconds.
-- Multi-item line support with quantity, unit rate, and dynamic GST slab.
-- Automatic tax determination:
-  - **Intra-State (Same State)**: Splits tax evenly into **CGST** (50%) + **SGST** (50%).
-  - **Inter-State (Different State)**: Applies full tax to **IGST** (100%).
-- Real-time calculations for Taxable Amount, Total CGST, Total SGST, Total IGST, and Grand Total.
-- Payment Status tracking: `Paid`, `Unpaid`, and `Partial`.
-
-### 📊 5. Executive Dashboard & Analytics
-- Today's Sales & bill count.
-- Monthly revenue & bill volume.
-- Daily & monthly CGST, SGST, and IGST tax collection breakdown.
-- Quick Action shortcuts to Parties, Products, and Invoices.
-- Recent Invoices list with one-tap detail view.
-
-### 📄 6. PDF Generation & Printing
-- Generates professional, GST-compliant PDF invoices.
-- In-app PDF preview, direct printer output, and system share sheet.
-- Formatted with shop header, GSTIN tags, itemized tax tables, and custom terms.
+* Business / Shop profile management
+* Customer / Party management
+* Product / Item management
+* GST-compliant invoice creation
+* Automatic CGST, SGST and IGST calculation
+* Sequential invoice numbers
+* Bill history
+* Dashboard sales statistics
+* Professional PDF invoice generation
+* PDF preview, printing and sharing
+* Email/password and Google authentication
+* Light, Dark and System themes
+* Responsive Flutter UI
 
 ---
 
-## 🎨 Design & User Experience
+## ✨ Features
 
-| Feature | Description |
-|---|---|
-| **Material 3 + Glassmorphism** | Translucent frosted-glass app bars and Floating Action Buttons (`BackdropFilter` blur sigma 14). |
-| **Theme-Aware** | Seamless switching between **Light**, **Dark (Midnight Slate `#0B0E14`)**, and **System** themes. |
-| **Responsive Layout** | Mobile bottom navigation bar + adaptive wide-screen `NavigationRail` for tablets, web, and desktop. |
-| **Floating Action Buttons (FABs)** | Screen-aware extended FABs: Dashboard (→ *New Bill*), Parties (→ *Add Party*), Products (→ *Add Product*), Invoices (→ *Create Invoice*). |
-| **Static Brand Splash Screen** | Minimal, clean splash screen featuring the official app logo and "GST Billing System" branding with zero animations. |
+### 🏪 Business Profile
+
+Manage the shop/business information used on invoices.
+
+* Shop name
+* Business address
+* Mobile number
+* Email
+* State
+* GSTIN
+* Invoice terms and conditions
+
+Business information is automatically used while generating invoices.
 
 ---
 
-## 🏗 Project Architecture & Directory Structure
+### 👥 Party / Customer Management
 
-The project follows a clean, modular architecture separating UI, business logic, providers, and data access services:
+Manage customers using a reusable party list.
+
+**Available operations:**
+
+* Add party
+* Edit party
+* Delete party
+* Search parties
+* View party details
+* View party bill history
+* Select an existing party while creating a bill
+* Quickly create a new party during billing
+
+**Party information:**
+
+* Name
+* Mobile number
+* Address
+* State
+* GSTIN
+* Email
+
+---
+
+### 📦 Product / Item Management
+
+Maintain a reusable product catalog.
+
+Each item can contain:
+
+* Item name
+* HSN/SAC code
+* Unit price
+* GST percentage
+
+Supported standard GST slabs include:
+
+```text
+0%
+5%
+12%
+18%
+28%
+```
+
+The application also supports entering a **custom GST percentage**.
+
+This allows products to be reused while creating multiple invoices.
+
+---
+
+### 🧾 GST Invoice Creation
+
+Create invoices by selecting a party and adding one or more products.
+
+For every bill item, the application calculates:
+
+```text
+Taxable Amount = Rate × Quantity
+```
+
+The GST calculation follows the state-based logic specified in the project requirements.
+
+#### Same-State Transaction
+
+When the business and customer are in the same state:
+
+```text
+GST
+ ├── CGST = GST / 2
+ └── SGST = GST / 2
+```
+
+Example:
+
+```text
+GST Rate = 18%
+
+CGST = 9%
+SGST = 9%
+```
+
+#### Inter-State Transaction
+
+When the business and customer are in different states:
+
+```text
+IGST = Full GST Rate
+CGST = 0
+SGST = 0
+```
+
+Example:
+
+```text
+GST Rate = 18%
+
+IGST = 18%
+```
+
+#### Invoice Totals
+
+```text
+Subtotal    = Sum of taxable amounts
+Total Tax   = CGST + SGST + IGST
+Grand Total = Subtotal + Total Tax
+```
+
+---
+
+## 🔢 Invoice Numbering
+
+The application automatically generates sequential invoice numbers.
+
+The implemented format is:
+
+```text
+INV-YYYYMM-NNNN
+```
+
+Example:
+
+```text
+INV-202609-0001
+INV-202609-0002
+INV-202609-0003
+```
+
+Invoice numbers are generated automatically when creating bills.
+
+---
+
+## 🔒 Bill Immutability
+
+Once a bill is generated and saved, it is treated as a finalized invoice.
+
+Saved bills are not directly edited.
+
+For corrections, a new bill/appropriate correction workflow can be used, following the requirement that generated bills should not be editable.
+
+---
+
+## 💳 Payment Status
+
+Bills support payment status tracking:
+
+```text
+Paid
+Unpaid
+Partial
+```
+
+The payment status can be displayed in bill lists and bill details.
+
+---
+
+## 📊 Dashboard
+
+The dashboard provides an overview of billing activity.
+
+### Today's Statistics
+
+* Total sales
+* Number of bills
+* GST collected
+* CGST
+* SGST
+* IGST
+
+### Monthly Statistics
+
+* Total sales
+* Number of bills
+* GST collected
+* CGST
+* SGST
+* IGST
+
+### Quick Actions
+
+The dashboard provides shortcuts for:
+
+* Create New Bill
+* Manage Parties
+* Manage Items
+* View Invoices
+
+A recent invoice section is also available for quick access to recent bills.
+
+---
+
+## 📄 PDF Invoice
+
+The application generates professional PDF invoices using Flutter PDF libraries.
+
+Generated invoices contain information such as:
+
+### Business Information
+
+* Business/shop name
+* Address
+* State
+* GSTIN
+* Phone
+* Email
+
+### Invoice Information
+
+* Invoice number
+* Invoice date
+* Place of supply
+* Supply type
+
+### Customer Information
+
+* Party name
+* Address
+* State
+* Mobile
+* GSTIN
+
+### Item Details
+
+* Serial number
+* Item description
+* HSN/SAC
+* Quantity
+* Rate
+* Taxable amount
+* GST %
+* CGST
+* SGST
+* IGST
+* Line total
+
+### Summary
+
+* Subtotal
+* Total tax
+* Grand total
+* Amount in words
+* Terms & conditions
+
+The project task specifically requires downloadable/printable PDF invoices and sharing support.
+
+---
+
+## 📤 PDF Sharing & Printing
+
+Generated invoices can be:
+
+* Previewed
+* Printed
+* Shared
+* Saved/downloaded depending on the platform
+
+The project uses the Flutter `printing` package for printing and sharing workflows.
+
+---
+
+# 🔐 Authentication
+
+The project includes Firebase Authentication.
+
+Supported authentication flows include:
+
+### Email & Password
+
+* Register
+* Login
+* Logout
+* Authentication state handling
+
+### Google Sign-In
+
+Google authentication is also configured through Firebase.
+
+Authentication-related implementation can be found in:
+
+```text
+lib/services/auth_service.dart
+lib/controllers/auth_controller.dart
+lib/screens/auth/
+```
+
+Firebase configuration is provided through:
+
+```text
+lib/firebase_options.dart
+android/app/google-services.json
+```
+
+---
+
+# 🎨 UI / UX
+
+The application uses **Material 3** with a modern glass-style visual design.
+
+### Theme Modes
+
+Supported theme modes:
+
+```text
+Light
+Dark
+System
+```
+
+The dark theme uses a Midnight Slate style.
+
+### Responsive Layout
+
+The interface adapts to different screen sizes including:
+
+* Mobile
+* Tablet
+* Desktop
+* Web
+
+Navigation changes according to available screen width.
+
+---
+
+# 🧱 Project Architecture
+
+The project follows a modular Flutter structure separating:
+
+* Screens
+* Controllers
+* Providers
+* Models
+* Services
+* Routes
+* Theme
+* Reusable widgets
+* Utilities
 
 ```text
 gst_billing_system/
-├── android/                        # Native Android configuration
+│
+├── android/
+├── ios/
+├── macos/
+├── web/
+├── windows/
+├── linux/
+│
 ├── assets/
-│   ├── animation/                  # Animation assets
 │   └── logo/
-│       └── app_logo.png            # Official App Logo
+│       └── app_logo.png
+│
+├── docs/
+│   └── Project_Report.md
+│
 ├── lib/
-│   ├── app.dart                    # App root widget with GetMaterialApp
-│   ├── main.dart                   # Application entrypoint & initialization
+│   ├── app.dart
+│   ├── main.dart
+│   ├── firebase_options.dart
+│   │
+│   ├── controllers/
+│   │   ├── auth_controller.dart
+│   │   ├── bill_controller.dart
+│   │   ├── business_profile_controller.dart
+│   │   ├── item_controller.dart
+│   │   └── party_controller.dart
+│   │
 │   ├── core/
-│   │   ├── middleware/             # Route guards & auth middleware
-│   │   ├── routes/                 # AppRoutes & AppPages (GetX navigation)
-│   │   └── theme/                  # AppTheme, AppColors, AppMidnightColors, AppShadows
+│   │   ├── bindings/
+│   │   ├── middleware/
+│   │   ├── routes/
+│   │   └── theme/
+│   │
 │   ├── models/
-│   │   ├── bill.dart               # Bill & BillItem domain models
-│   │   ├── business_profile.dart   # Business profile model
-│   │   ├── item.dart               # Item/Product domain model
-│   │   └── party.dart              # Customer/Party domain model
+│   │   ├── bill.dart
+│   │   ├── bill_item.dart
+│   │   ├── business_profile.dart
+│   │   ├── item.dart
+│   │   └── party.dart
+│   │
 │   ├── providers/
-│   │   ├── bill_provider.dart      # Provider for invoice state & dashboard stats
-│   │   ├── business_profile_provider.dart # Business profile state
-│   │   ├── item_provider.dart      # Product catalog state
-│   │   └── party_provider.dart     # Customer state
+│   │   ├── bill_provider.dart
+│   │   ├── business_profile_provider.dart
+│   │   ├── item_provider.dart
+│   │   └── party_provider.dart
+│   │
 │   ├── screens/
-│   │   ├── auth/                   # LoginScreen & RegisterScreen (Firebase Auth)
-│   │   ├── bill/                   # BillListScreen, CreateBillScreen, BillDetailScreen
-│   │   ├── dashboard/              # DashboardScreen
-│   │   ├── home_shell.dart         # Responsive navigation shell (Rail/BottomBar + FABs)
-│   │   ├── item/                   # ItemListScreen & ItemFormScreen
-│   │   ├── party/                  # PartyListScreen, PartyFormScreen, PartyDetailScreen
-│   │   ├── settings/               # BusinessProfileScreen (Dedicated profile & theme settings)
-│   │   ├── setup/                  # ShopSetupScreen (Initial onboarding setup)
-│   │   └── splash/                 # SplashScreen (Static official logo + branding)
+│   │   ├── auth/
+│   │   ├── bill/
+│   │   ├── dashboard/
+│   │   ├── item/
+│   │   ├── party/
+│   │   ├── settings/
+│   │   ├── setup/
+│   │   └── splash/
+│   │
 │   ├── services/
-│   │   ├── auth_service.dart       # Firebase Authentication service
-│   │   ├── database_service.dart   # SQLite database manager (CRUD operations)
-│   │   └── pdf_service.dart        # PDF generation, preview & print service
+│   │   ├── auth_service.dart
+│   │   ├── database_service.dart
+│   │   ├── gst_calculator.dart
+│   │   └── pdf_service.dart
+│   │
 │   ├── utils/
-│   │   ├── constants.dart          # Project constants (GST slabs, states, currencies, dates)
-│   │   ├── gst_calculator.dart     # Pure GST tax calculation utility
-│   │   └── validators.dart         # Form validation rules (GSTIN, phone, email)
+│   │   ├── constants.dart
+│   │   ├── number_to_words.dart
+│   │   └── validators.dart
+│   │
 │   └── widgets/
-│       ├── common/                 # GlassAppBar, GlassFloatingActionButton, GlassAlertDialog, SectionHeader
-│       └── ...                     # Reusable UI widgets (SearchField, StatusBadge, EmptyState)
-├── requirements/                   # Requirements specification & Design guidelines
-├── test/                           # Comprehensive test suite (42 unit & widget tests)
-└── pubspec.yaml                    # Package manifest & dependencies
+│       ├── common/
+│       ├── bill_item_tile.dart
+│       ├── empty_state.dart
+│       ├── gst_summary_card.dart
+│       └── search_field.dart
+│
+├── test/
+│
+├── pubspec.yaml
+└── README.md
 ```
 
 ---
 
-## ⚙️ Project Constants & Configurations
+# 🗃 Data Models
 
-All core application constants are centralized in [`lib/utils/constants.dart`](file:///d:/Flutter%20Projects/gst_billing_system/lib/utils/constants.dart):
+The application uses models representing the main billing entities.
 
-### 1. General App Constants (`AppConstants`)
-```dart
-static const String appName = 'GST Billing';
-static const String appTagline = 'Fast, Reliable & GST-Compliant Invoicing';
-static const String appLogo = 'assets/logo/app_logo.png';
+### Business Profile
+
+```text
+BusinessProfile
 ```
 
-### 2. Standard Indian GST Slabs
-Standard GST rates applicable under Indian GST laws:
-```dart
-static const List<double> gstSlabs = [0.0, 5.0, 12.0, 18.0, 28.0];
+Contains shop/business information.
+
+### Party
+
+```text
+Party
 ```
 
-### 3. States & Union Territories
-Complete list of all 28 Indian States and 8 Union Territories for place-of-supply tax determination:
-- **States**: Andhra Pradesh, Arunachal Pradesh, Assam, Bihar, Chhattisgarh, Goa, Gujarat, Haryana, Himachal Pradesh, Jharkhand, Karnataka, Kerala, Madhya Pradesh, Maharashtra, Manipur, Meghalaya, Mizoram, Nagaland, Odisha, Punjab, Rajasthan, Sikkim, Tamil Nadu, Telangana, Tripura, Uttar Pradesh, Uttarakhand, West Bengal.
-- **Union Territories**: Andaman and Nicobar Islands, Chandigarh, Dadra and Nagar Haveli and Daman and Diu, Delhi, Jammu and Kashmir, Ladakh, Lakshadweep, Puducherry.
+Contains customer information.
 
-### 4. Currency & Date Formats
-- **Currency**: Indian Rupee (`en_IN`, symbol: `₹`, format: `#,##,##0.00`).
-- **Date Formats**:
-  - `invoiceDateFormat`: `dd MMM yyyy` (e.g., `19 Sep 2026`)
-  - `invoiceDateTimeFormat`: `dd MMM yyyy, hh:mm a` (e.g., `19 Sep 2026, 11:30 AM`)
-  - `monthYearFormat`: `MMMM yyyy` (e.g., `September 2026`)
+### Item
 
-### 5. Color Palette & Tax Semantics
-- **Brand Colors**: Primary Indigo (`#3F51B5`), Secondary Teal (`#00897B`).
-- **Midnight Slate Dark Theme**: Scaffold Background (`#0B0E14`), Surface (`#141923`), Border (`#232B3E`), Card Container (`#1E2638`).
-- **Tax Tagging Colors**:
-  - **CGST**: `#1565C0` (Blue)
-  - **SGST**: `#00838F` (Cyan)
-  - **IGST**: `#6A1B9A` (Purple)
-  - **Paid**: `#2E7D32` (Green)
-  - **Unpaid**: `#D32F2F` (Red)
-  - **Partial**: `#FF8F00` (Amber)
+```text
+Item
+```
+
+Contains reusable product information.
+
+### Bill
+
+```text
+Bill
+```
+
+Contains invoice-level information.
+
+### BillItem
+
+```text
+BillItem
+```
+
+Contains the item snapshot and calculated tax values used in an invoice.
+
+The project task defines the core entities as Party, Item, Bill and BillItem.
 
 ---
 
-## 🧮 GST Calculation Engine
+# 💾 Local Database
 
-Tax calculations are implemented in [`lib/utils/gst_calculator.dart`](file:///d:/Flutter%20Projects/gst_billing_system/lib/utils/gst_calculator.dart) adhering to Indian GST compliance rules:
+The application uses SQLite for local persistence.
 
-$$\text{Taxable Amount} = \text{Rate} \times \text{Quantity}$$
+Database implementation:
 
-$$\text{Total Tax} = \text{Taxable Amount} \times \left(\frac{\text{GST \%}}{100}\right)$$
+```text
+lib/services/database_service.dart
+```
 
-### Tax Classification Rules:
-- **Intra-State Transaction** ($\text{Seller State} = \text{Buyer State}$):
-  $$\text{CGST} = \frac{\text{Total Tax}}{2}, \quad \text{SGST} = \frac{\text{Total Tax}}{2}, \quad \text{IGST} = 0$$
-- **Inter-State Transaction** ($\text{Seller State} \neq \text{Buyer State}$):
-  $$\text{IGST} = \text{Total Tax}, \quad \text{CGST} = 0, \quad \text{SGST} = 0$$
+SQLite is used to persist billing-related application data locally.
 
-$$\text{Grand Total} = \text{Total Taxable Amount} + \text{Total Tax}$$
+The project also uses:
+
+```text
+shared_preferences
+```
+
+for lightweight local preferences/settings.
 
 ---
 
-## 🗄 Database Schema (SQLite)
+# 🧮 GST Calculation Service
 
-Local offline persistence is managed by [`lib/services/database_service.dart`](file:///d:/Flutter%20Projects/gst_billing_system/lib/services/database_service.dart) via `sqflite`:
+GST calculations are separated into a dedicated service:
 
-```sql
--- Business / Shop Profile
-CREATE TABLE business_profile (
-  id TEXT PRIMARY KEY,
-  shop_name TEXT NOT NULL,
-  phone TEXT NOT NULL,
-  email TEXT,
-  state TEXT NOT NULL,
-  gstin TEXT,
-  address TEXT NOT NULL,
-  terms_conditions TEXT
-);
+```text
+lib/services/gst_calculator.dart
+```
 
--- Customers / Parties
-CREATE TABLE parties (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  mobile TEXT NOT NULL,
-  address TEXT NOT NULL,
-  state TEXT NOT NULL,
-  gstin TEXT,
-  email TEXT,
-  created_at INTEGER NOT NULL
-);
+The calculation flow is:
 
--- Products / Items Catalog
-CREATE TABLE items (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  hsn_code TEXT,
-  unit_price REAL NOT NULL,
-  gst_percent REAL NOT NULL,
-  created_at INTEGER NOT NULL
-);
-
--- GST Invoices / Bills
-CREATE TABLE bills (
-  id TEXT PRIMARY KEY,
-  invoice_no TEXT NOT NULL UNIQUE,
-  party_id TEXT NOT NULL,
-  party_name TEXT NOT NULL,
-  party_state TEXT NOT NULL,
-  party_gstin TEXT,
-  date INTEGER NOT NULL,
-  subtotal REAL NOT NULL,
-  total_cgst REAL NOT NULL,
-  total_sgst REAL NOT NULL,
-  total_igst REAL NOT NULL,
-  grand_total REAL NOT NULL,
-  payment_status TEXT NOT NULL,
-  notes TEXT,
-  is_inter_state INTEGER NOT NULL
-);
-
--- Invoice Line Items
-CREATE TABLE bill_items (
-  id TEXT PRIMARY KEY,
-  bill_id TEXT NOT NULL,
-  item_id TEXT,
-  name TEXT NOT NULL,
-  hsn_code TEXT,
-  quantity INTEGER NOT NULL,
-  unit_price REAL NOT NULL,
-  gst_percent REAL NOT NULL,
-  taxable_amount REAL NOT NULL,
-  cgst REAL NOT NULL,
-  sgst REAL NOT NULL,
-  igst REAL NOT NULL,
-  total REAL NOT NULL,
-  FOREIGN KEY (bill_id) REFERENCES bills(id) ON DELETE CASCADE
-);
+```text
+Product Rate
+     ↓
+Quantity
+     ↓
+Taxable Amount
+     ↓
+GST Rate
+     ↓
+Compare Business State & Party State
+     ↓
+ ┌───────────────┬───────────────┐
+ │ Same State    │ Different     │
+ │               │ State         │
+ ↓               ↓
+CGST + SGST      IGST
+     ↓               ↓
+     └───────┬───────┘
+             ↓
+       Line Total
+             ↓
+       Grand Total
 ```
 
 ---
 
-## 🗺 Routes & Navigation
+# 🧪 Testing
 
-Navigation is defined in [`lib/core/routes/app_routes.dart`](file:///d:/Flutter%20Projects/gst_billing_system/lib/core/routes/app_routes.dart) and managed with GetX:
+The repository contains tests covering different parts of the application.
 
-| Route Name | Path | Description | Middleware |
-|---|---|---|---|
-| `AppRoutes.splash` | `/` | Static official logo splash screen | None |
-| `AppRoutes.login` | `/login` | Firebase Email/Password & Google login | None |
-| `AppRoutes.register` | `/register` | Account registration | None |
-| `AppRoutes.shopSetup` | `/shop-setup` | First-time business setup wizard | `AuthMiddleware` |
-| `AppRoutes.home` | `/home` | Main Home Shell (Dashboard, Parties, Products, Invoices, Profile) | `AuthMiddleware` |
-| `AppRoutes.parties` | `/parties` | Parties listing | `AuthMiddleware` |
-| `AppRoutes.partyForm` | `/party-form` | Add/Edit party form | `AuthMiddleware` |
-| `AppRoutes.items` | `/items` | Products listing | `AuthMiddleware` |
-| `AppRoutes.itemForm` | `/item-form` | Add/Edit product form | `AuthMiddleware` |
-| `AppRoutes.bills` | `/bills` | Invoice history list | `AuthMiddleware` |
-| `AppRoutes.createBill` | `/create-bill` | Invoice creation workflow | `AuthMiddleware` |
-| `AppRoutes.settings` | `/settings` | Dedicated Business Profile screen | `AuthMiddleware` |
+Test files include:
 
----
+```text
+test/gst_calculator_test.dart
+test/auth_validators_test.dart
+test/item_form_custom_gst_test.dart
+test/live_persistent_data_test.dart
+test/shop_setup_screen_test.dart
+test/business_profile_screen_test.dart
+test/glass_dialog_test.dart
+test/glass_fab_test.dart
+test/home_shell_fab_test.dart
+test/splash_screen_test.dart
+test/widget_test.dart
+```
 
-## 🚀 Getting Started & Installation
-
-### Prerequisites
-- **Flutter SDK**: `>= 3.12.2`
-- **Dart SDK**: `>= 3.12.2`
-- **Android Studio** / **VS Code** with Flutter extensions
-- **Firebase Project** (Optional for local testing; required for live auth)
-
-### Setup Steps
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/your-username/gst_billing_system.git
-   cd gst_billing_system
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   flutter pub get
-   ```
-
-3. **Configure Firebase** (if deploying with live backend):
-   - Place `google-services.json` in `android/app/`.
-   - Place `GoogleService-Info.plist` in `ios/Runner/`.
-
-4. **Run the Application**:
-   ```bash
-   # Run on connected device or emulator
-   flutter run
-
-   # Run on Chrome / Web
-   flutter run -d chrome
-
-   # Run on Windows desktop
-   flutter run -d windows
-   ```
-
----
-
-## 🧪 Testing & Quality Assurance
-
-The codebase is backed by a 100% passing test suite covering unit tests, validator rules, widget interactions, and responsive layouts:
+Run all tests with:
 
 ```bash
-# Run static analysis
-flutter analyze
-
-# Run all test suites
 flutter test
 ```
 
-### Test Coverage Highlights:
-- **`auth_validators_test.dart`**: Email, password, and form validation tests.
-- **`gst_calculator_test.dart`**: Intra-state vs. inter-state tax split validation.
-- **`splash_screen_test.dart`**: Verifies static logo, title, and absence of animations.
-- **`business_profile_screen_test.dart`**: Header card, required/optional fields, and dark theme tests.
-- **`home_shell_fab_test.dart`**: Verifies dynamic Glassmorphic FABs on Dashboard, Parties, Products, and Invoices across mobile, tablet, and dark mode.
-- **`glass_fab_test.dart`**: Tests glassmorphic styling, blur filters, and tap handlers.
-- **`glass_dialog_test.dart`**: Tests frosted dialog styling and actions.
-- **`shop_setup_screen_test.dart`**: Tests onboarding fields and validation.
-- **`widget_test.dart`**: Narrow screen responsiveness and theme tests.
+Run a specific test:
+
+```bash
+flutter test test/gst_calculator_test.dart
+```
 
 ---
 
-## 📦 Dependencies
+# 🛠 Technology Stack
 
-| Package | Version | Purpose |
-|---|---|---|
-| `provider` | `^6.1.2` | State management |
-| `get` | `^4.7.3` | Routing & theme controller |
-| `sqflite` | `^2.4.1` | Local SQLite database |
-| `firebase_auth` | `^6.7.0` | Authentication |
-| `firebase_core` | `^4.15.0` | Firebase initialization |
-| `google_sign_in` | `^7.2.0` | Google Single Sign-On |
-| `pdf` | `^3.11.2` | PDF document layout & drawing |
-| `printing` | `^5.13.3` | Direct printing & sharing |
-| `flutter_animate` | `^4.5.2` | Fluid transitions & motion |
-| `google_fonts` | `^6.2.1` | Typography |
-| `intl` | `^0.19.0` | Currency & date formatting |
-| `shared_preferences` | `^2.3.2` | Key-value settings storage |
+| Technology         | Usage                                          |
+| ------------------ | ---------------------------------------------- |
+| Flutter            | Application framework                          |
+| Dart               | Programming language                           |
+| Material 3         | UI design system                               |
+| Provider           | Application state/data providers               |
+| GetX               | Routing, controllers and dependency management |
+| SQLite / sqflite   | Local database                                 |
+| Firebase Core      | Firebase integration                           |
+| Firebase Auth      | Authentication                                 |
+| Google Sign-In     | Google authentication                          |
+| PDF                | PDF invoice generation                         |
+| Printing           | PDF preview, printing and sharing              |
+| Shared Preferences | Local preferences                              |
+| Path Provider      | Application storage paths                      |
+| UUID               | Unique identifiers                             |
+| Intl               | Currency/date formatting                       |
+| Google Fonts       | Typography                                     |
+| Flutter Animate    | UI animation support                           |
+| Shimmer            | Loading states                                 |
+| Lottie             | Animation support                              |
 
 ---
 
-## 📄 License
+# 📦 Main Dependencies
 
-This project is licensed under the **MIT License**. See the `LICENSE` file for details.
+Important dependencies from `pubspec.yaml` include:
+
+```yaml
+provider: ^6.1.2
+intl: ^0.19.0
+pdf: ^3.11.2
+printing: ^5.13.3
+shared_preferences: ^2.3.2
+sqflite: ^2.4.1
+path_provider: ^2.1.5
+path: ^1.9.0
+uuid: ^4.5.1
+firebase_core: ^4.15.0
+firebase_auth: ^6.7.0
+google_sign_in: ^7.2.0
+get: ^4.7.3
+google_fonts: ^6.2.1
+flutter_animate: ^4.5.2
+shimmer: ^3.0.0
+lottie: ^3.6.1
+```
+
+---
+
+# 🚀 Getting Started
+
+## 1. Clone the Repository
+
+```bash
+git clone https://github.com/valaprashant97/gst_billing_system.git
+```
+
+Navigate to the project:
+
+```bash
+cd gst_billing_system
+```
+
+---
+
+## 2. Install Dependencies
+
+```bash
+flutter pub get
+```
+
+---
+
+## 3. Configure Firebase
+
+The project contains Firebase configuration files.
+
+Before running the application on a new Firebase project/environment, make sure the Firebase configuration matches your Firebase project.
+
+Required configuration may include:
+
+```text
+android/app/google-services.json
+lib/firebase_options.dart
+```
+
+Enable the required authentication providers in Firebase Console.
+
+---
+
+## 4. Run the Application
+
+Check available devices:
+
+```bash
+flutter devices
+```
+
+Run the application:
+
+```bash
+flutter run
+```
+
+For a specific platform:
+
+```bash
+flutter run -d android
+```
+
+or:
+
+```bash
+flutter run -d chrome
+```
+
+---
+
+# 📱 Build Android APK
+
+For a release APK:
+
+```bash
+flutter build apk --release
+```
+
+The generated APK can be found under:
+
+```text
+build/app/outputs/flutter-apk/release/
+```
+
+---
+
+# 🖥 Build for Web
+
+```bash
+flutter build web
+```
+
+---
+
+# 🍎 Build for iOS
+
+On macOS with Xcode configured:
+
+```bash
+flutter build ios
+```
+
+---
+
+# 🧪 Project Requirements
+
+According to the project task, the final application should support:
+
+* Party/customer management
+* Reusable item/product management
+* GST invoice creation
+* Automatic GST calculation
+* CGST + SGST for same-state transactions
+* IGST for inter-state transactions
+* Sequential invoice numbers
+* Invoice date
+* Bill history
+* Dashboard
+* Search/filter functionality
+* PDF invoice generation
+* PDF sharing/printing
+* Sample PDF invoices
+* Project documentation
+
+These requirements are based on the provided Darshan University task specification.
+
+---
+
+# 📄 Project Documentation
+
+Additional project documentation is available at:
+
+```text
+docs/Project_Report.md
+```
+
+The report contains information about:
+
+* Project overview
+* Technology stack
+* Core modules
+* GST calculation
+* PDF invoice generation
+* Dashboard
+* Testing
+* Sample invoice deliverables
+
+---
+
+# 📂 Important Directories
+
+| Directory          | Purpose                  |
+| ------------------ | ------------------------ |
+| `lib/screens/`     | Application screens      |
+| `lib/models/`      | Data models              |
+| `lib/services/`    | Business/data services   |
+| `lib/providers/`   | State/data providers     |
+| `lib/controllers/` | Controllers              |
+| `lib/core/routes/` | Navigation routes        |
+| `lib/core/theme/`  | Theme configuration      |
+| `lib/widgets/`     | Reusable UI components   |
+| `lib/utils/`       | Utilities and validation |
+| `assets/logo/`     | Application logo         |
+| `docs/`            | Project documentation    |
+| `test/`            | Automated tests          |
+
+---
+
+# 🔄 Billing Workflow
+
+```text
+Login / Register
+       ↓
+Shop Setup
+       ↓
+Dashboard
+       ↓
+Add Party
+       ↓
+Add Product
+       ↓
+Create New Bill
+       ↓
+Select Party
+       ↓
+Add Items
+       ↓
+Enter Quantity
+       ↓
+Automatic GST Calculation
+       ↓
+Review Invoice
+       ↓
+Save Bill
+       ↓
+Generate PDF
+       ↓
+Preview / Print / Share
+```
+
+---
+
+# 🧾 GST Example
+
+### Same-State Example
+
+```text
+Business State : Gujarat
+Customer State : Gujarat
+
+Taxable Amount : ₹10,000
+GST Rate       : 18%
+
+CGST : ₹900
+SGST : ₹900
+
+Total Tax : ₹1,800
+Grand Total: ₹11,800
+```
+
+### Inter-State Example
+
+```text
+Business State : Gujarat
+Customer State : Maharashtra
+
+Taxable Amount : ₹10,000
+GST Rate       : 18%
+
+IGST : ₹1,800
+CGST : ₹0
+SGST : ₹0
+
+Total Tax : ₹1,800
+Grand Total: ₹11,800
+```
+
+The underlying calculation rules follow the task specification.
+
+---
+
+# 🎯 Project Objective
+
+The primary objective of this project is to replace manual or spreadsheet-based billing workflows with a structured digital billing application that can:
+
+1. Manage customers.
+2. Manage reusable products.
+3. Create GST invoices.
+4. Automatically calculate applicable GST.
+5. Maintain billing history.
+6. Generate professional PDF invoices.
+7. Allow invoices to be printed or shared.
+
+These objectives correspond to the requirements provided for the practical project.
+
+---
+
+# 📋 Submission Deliverables
+
+The project task specifies the following submission items:
+
+* Working application
+* Source code
+* At least 3 sample bills generated as PDF
+* Short project report
+* Screenshots/documentation
+* GitHub repository or zipped project
+
+The required deliverables are defined in the provided task document.
+
+---
+
+# 👨‍💻 Author
+
+**Prashant Valapara**
+
+GitHub:
+
+```text
+https://github.com/valaprashant97
+```
+
+Repository:
+
+```text
+https://github.com/valaprashant97/gst_billing_system
+```
+
+---
+
+# 📜 License
+
+This project is intended for educational and practical project submission purposes.
+
+---
+
+## ⭐ GST Billing System
+
+**A simple and professional digital billing solution for GST-based invoicing.**
+
+```text
+Manage Parties → Manage Products → Create GST Bill
+                         ↓
+                  Auto GST Calculation
+                         ↓
+                  Generate PDF Invoice
+                         ↓
+                  Print / Share / Save
+```
