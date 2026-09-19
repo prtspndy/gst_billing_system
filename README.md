@@ -46,7 +46,7 @@ A modern, full-featured cross-platform GST billing and invoicing application bui
 
 ### 📦 3. Products & Items Catalog
 - Reusable product catalog preventing manual data re-entry.
-- Item Name, HSN/SAC Code, Unit Price, and Standard GST Slab (0%, 5%, 12%, 18%, 28%).
+- Item Name, HSN/SAC Code, Unit Price, Standard GST Slabs (0%, 5%, 12%, 18%, 28%), and **Custom GST Rate** input support (e.g. 0.25%, 3%, 7.5%).
 - Fast search and filtering by item name or HSN code.
 - Quick product selection dialog when composing invoices.
 

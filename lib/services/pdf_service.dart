@@ -249,7 +249,7 @@ class PdfService {
                     '${item.qty}',
                     AppConstants.formatAmountOnly(item.rate),
                     AppConstants.formatAmountOnly(item.taxableAmount),
-                    '${item.gstPercent.toStringAsFixed(0)}%',
+                    AppConstants.formatGstRate(item.gstPercent),
                     AppConstants.formatAmountOnly(item.igst),
                     AppConstants.formatAmountOnly(item.lineTotal),
                   ];
@@ -261,7 +261,7 @@ class PdfService {
                     '${item.qty}',
                     AppConstants.formatAmountOnly(item.rate),
                     AppConstants.formatAmountOnly(item.taxableAmount),
-                    '${item.gstPercent.toStringAsFixed(0)}%',
+                    AppConstants.formatGstRate(item.gstPercent),
                     AppConstants.formatAmountOnly(item.cgst),
                     AppConstants.formatAmountOnly(item.sgst),
                     AppConstants.formatAmountOnly(item.lineTotal),

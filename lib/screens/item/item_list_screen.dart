@@ -227,7 +227,7 @@ class _ItemListScreenState extends State<ItemListScreen> {
                                             borderRadius: BorderRadius.circular(6),
                                           ),
                                           child: Text(
-                                            'GST: ${item.gstPercent.toStringAsFixed(0)}%',
+                                            'GST: ${AppConstants.formatGstRate(item.gstPercent)}',
                                             style: TextStyle(
                                               fontSize: 10.5,
                                               fontWeight: FontWeight.w600,

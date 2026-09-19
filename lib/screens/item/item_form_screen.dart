@@ -225,24 +225,91 @@ class _ItemFormScreenState extends State<ItemFormScreen> {
                         const SizedBox(height: 8),
                         Wrap(
                           spacing: 8,
-                          children: AppConstants.gstSlabs.map((slab) {
-                            final isSelected = _selectedGstPercent == slab;
-                            return ChoiceChip(
-                              label: Text('${slab.toStringAsFixed(0)}% GST'),
-                              selected: isSelected,
+                          runSpacing: 8,
+                          children: [
+                            ...AppConstants.gstSlabs.map((slab) {
+                              final isSelected = !_isCustomGst && _selectedGstPercent == slab;
+                              return ChoiceChip(
+                                label: Text('${slab.toStringAsFixed(0)}% GST'),
+                                selected: isSelected,
+                                selectedColor: colorScheme.primary,
+                                labelStyle: TextStyle(
+                                  color: isSelected ? Colors.white : colorScheme.onSurface,
+                                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                ),
+                                onSelected: (bool selected) {
+                                  if (selected) {
+                                    setState(() {
+                                      _isCustomGst = false;
+                                      _selectedGstPercent = slab;
+                                      _customGstController.clear();
+                                    });
+                                  }
+                                },
+                              );
+                            }),
+                            ChoiceChip(
+                              label: Text(_isCustomGst && _customGstController.text.trim().isNotEmpty
+                                  ? 'Custom (${_customGstController.text.trim()}%)'
+                                  : 'Custom'),
+                              selected: _isCustomGst,
                               selectedColor: colorScheme.primary,
+                              avatar: _isCustomGst ? null : const Icon(Icons.tune_rounded, size: 16),
                               labelStyle: TextStyle(
-                                color: isSelected ? Colors.white : colorScheme.onSurface,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                color: _isCustomGst ? Colors.white : colorScheme.onSurface,
+                                fontWeight: _isCustomGst ? FontWeight.bold : FontWeight.normal,
                               ),
                               onSelected: (bool selected) {
-                                if (selected) {
-                                  setState(() => _selectedGstPercent = slab);
-                                }
+                                setState(() {
+                                  _isCustomGst = true;
+                                  if (_customGstController.text.trim().isNotEmpty) {
+                                    final parsed = double.tryParse(_customGstController.text.trim());
+                                    if (parsed != null && parsed >= 0 && parsed <= 100) {
+                                      _selectedGstPercent = parsed;
+                                    }
+                                  }
+                                });
                               },
-                            );
-                          }).toList(),
+                            ),
+                          ],
                         ),
+                        if (_isCustomGst) ...[
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _customGstController,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            autofocus: true,
+                            decoration: InputDecoration(
+                              labelText: 'Custom GST Rate (%) *',
+                              hintText: 'e.g. 3 or 7.5',
+                              prefixIcon: const Icon(Icons.percent_rounded),
+                              suffixText: '%',
+                              helperText: 'Enter a valid percentage between 0% and 100%',
+                              helperStyle: TextStyle(
+                                color: colorScheme.onSurface.withValues(alpha: 0.6),
+                              ),
+                            ),
+                            validator: (v) {
+                              if (!_isCustomGst) return null;
+                              if (v == null || v.trim().isEmpty) {
+                                return 'Please enter custom GST rate';
+                              }
+                              final val = double.tryParse(v.trim());
+                              if (val == null || val < 0 || val > 100) {
+                                return 'Enter a valid GST rate between 0 and 100';
+                              }
+                              return null;
+                            },
+                            onChanged: (val) {
+                              final parsed = double.tryParse(val.trim());
+                              if (parsed != null && parsed >= 0 && parsed <= 100) {
+                                setState(() {
+                                  _selectedGstPercent = parsed;
+                                });
+                              }
+                            },
+                          ),
+                        ],
                       ],
                     ),
                   ),

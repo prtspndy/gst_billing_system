@@ -98,7 +98,7 @@ class BillItemTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  'GST: ${item.gstPercent.toStringAsFixed(0)}%',
+                  'GST: ${AppConstants.formatGstRate(item.gstPercent)}',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
