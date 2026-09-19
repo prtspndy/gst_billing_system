@@ -102,6 +102,14 @@ class AppConstants {
     return NumberFormat('#,##,##0.00', 'en_IN').format(amount);
   }
 
+  // Format GST Percentage (e.g. 18% or 0.25% or 7.5%)
+  static String formatGstRate(double percent) {
+    if (percent % 1 == 0) {
+      return '${percent.toInt()}%';
+    }
+    return '${percent.toStringAsFixed(2).replaceAll(RegExp(r'\.?0+$'), '')}%';
+  }
+
   // Date Formatters
   static final DateFormat invoiceDateFormat = DateFormat('dd MMM yyyy');
   static final DateFormat invoiceDateTimeFormat = DateFormat('dd MMM yyyy, hh:mm a');
