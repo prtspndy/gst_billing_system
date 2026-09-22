@@ -950,12 +950,6 @@ https://github.com/valaprashant97/gst_billing_system
 
 ---
 
-# 📜 License
-
-This project is intended for educational and practical project submission purposes.
-
----
-
 ## ⭐ GST Billing System
 
 **A simple and professional digital billing solution for GST-based invoicing.**
